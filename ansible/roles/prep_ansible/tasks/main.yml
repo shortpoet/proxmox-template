@@ -1,0 +1,23 @@
+---
+- name: "install python-apt so native apt plugins work"
+  package:
+    name: "python3-apt"
+    state: "present"
+
+- name: "Update all packages to the latest version"
+  apt:
+    upgrade: "dist"
+
+- name: "Install python apt packages"
+  apt:
+    name: "{{ packages }}"
+
+- name: "pip update pip"
+  pip:
+    name: "pip"
+    state: "latest"
+
+- name: "Install pip dependencies"
+  pip:
+    name: "{{ pip_packages }}"
+    state: "latest"

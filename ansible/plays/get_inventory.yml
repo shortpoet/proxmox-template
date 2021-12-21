@@ -1,0 +1,12 @@
+---
+- hosts: proxmox
+  gather_facts: true
+  vars:
+    pve_node: proxmox
+    pve_apiuser: root@pam
+    pve_apipass: '{{ lookup("env", "PROXMOX_PASSWORD") }}'
+  roles:
+    - ../roles/proxmox_inventory
+# - name: Print all available facts
+#   ansible.builtin.debug:
+#     var: ansible_facts

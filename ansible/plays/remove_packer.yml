@@ -2,4 +2,4 @@
 - hosts: proxmox
   gather_facts: true
   roles:
-    - ./ansible/roles/remove_packer
+    - ../roles/remove_packer

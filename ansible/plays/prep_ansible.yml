@@ -1,0 +1,16 @@
+---
+- name: "Prep proxmox hosts for automation"
+  hosts: "proxmox"
+  gather_facts: false
+  vars:
+    packages:
+      - "python3-pip"
+      - "python3-dev"
+      - "build-essential"
+    pip_packages:
+      - "virtualenv"
+      - "proxmoxer"
+      - "requests"
+      - "jmespath"
+  roles:
+    - ../roles/prep_ansible

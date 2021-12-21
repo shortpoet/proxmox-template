@@ -2,4 +2,4 @@
 - hosts: proxmox
   gather_facts: true
   roles:
-    - ./ansible/roles/install_packer
+    - ../roles/install_packer
