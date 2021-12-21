@@ -1,0 +1,8 @@
+---
+- name: Delete packer binary
+  file:
+    state: absent
+    path: "{{ packer_bin_path }}/packer"
+
+- name: Ensure unzip is uninstalled.
+  package: name=unzip state=absent
