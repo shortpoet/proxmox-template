@@ -1,0 +1,65 @@
+---
+- name: Get list of existing vms for each node
+  uri:
+    url: "https://{{ pve_node }}:{{ pve_api_port }}/api2/json/nodes/{{ item.node }}/qemu"
+    method: GET
+    headers:
+      Cookie: "PVEAuthCookie={{ pve_node_ticket.json.data.ticket }}"
+    body_format: form-urlencoded
+    return_content: yes
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+  loop: "{{ pve_node_list.json.data }}"
+  register: pve_vm_list
+  # Output is very noisey
+  no_log: True
+
+# - debug:
+#     var: pve_vm_list
+
+- name: Get list of existing containers for each node
+  uri:
+    url: "https://{{ pve_node }}:{{ pve_api_port }}/api2/json/nodes/{{ item.node }}/lxc"
+    method: GET
+    headers:
+      Cookie: "PVEAuthCookie={{ pve_node_ticket.json.data.ticket }}"
+    body_format: form-urlencoded
+    return_content: yes
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+  loop: "{{ pve_node_list.json.data }}"
+  register: pve_ct_list
+  # Output is very noisey
+  no_log: True
+
+# - debug:
+#     var: pve_ct_list
+
+- name: Compile list of all vms in cluster
+  set_fact:
+    pve_vm_list_clean: "{{ item.json.data }}"
+  loop: "{{ pve_vm_list.results }}"
+  no_log: false
+
+- debug:
+    var: pve_vm_list_clean
+
+# - name: VM already exists
+#   set_fact:
+#     pve_container_exists: True
+#   when: pve_vm_hostname in pve_vm_list_clean|json_query('[*].name')
+
+# - name: VM does not exist
+#   set_fact:
+#     pve_container_exists: False
+#   when: pve_vm_hostname not in pve_vm_list_clean|json_query('[*].name')
+
+- name: Get VM current state
+  community.general.proxmox_kvm:
+    api_user: "{{ pve_apiuser }}"
+    api_password: "{{ pve_apipass }}"
+    api_host: proxmox
+    name: 2004clone-cloud-init
+    node: proxmox
+    state: current
+# - name: Print all available facts
+#   ansible.builtin.debug:
+#     var: ansible_facts

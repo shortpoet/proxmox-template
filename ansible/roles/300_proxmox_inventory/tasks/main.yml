@@ -22,86 +22,91 @@
     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
   register: pve_node_list
 
+- include_tasks: vms.yml
+  when: get_vms
+
+- include_tasks: containers.yml
+  when: get_containers
 # - debug:
 #     var: pve_node_list
 
-- name: Get list of existing vms for each node
-  uri:
-    url: "https://{{ pve_node }}:{{ pve_api_port }}/api2/json/nodes/{{ item.node }}/qemu"
-    method: GET
-    headers:
-      Cookie: "PVEAuthCookie={{ pve_node_ticket.json.data.ticket }}"
-    body_format: form-urlencoded
-    return_content: yes
-    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
-  loop: "{{ pve_node_list.json.data }}"
-  register: pve_vm_list
-  # Output is very noisey
-  no_log: True
+# - name: Get list of existing vms for each node
+#   uri:
+#     url: "https://{{ pve_node }}:{{ pve_api_port }}/api2/json/nodes/{{ item.node }}/qemu"
+#     method: GET
+#     headers:
+#       Cookie: "PVEAuthCookie={{ pve_node_ticket.json.data.ticket }}"
+#     body_format: form-urlencoded
+#     return_content: yes
+#     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+#   loop: "{{ pve_node_list.json.data }}"
+#   register: pve_vm_list
+#   # Output is very noisey
+#   no_log: True
+
+# # - debug:
+# #     var: pve_vm_list
+
+# - name: Get list of existing containers for each node
+#   uri:
+#     url: "https://{{ pve_node }}:{{ pve_api_port }}/api2/json/nodes/{{ item.node }}/lxc"
+#     method: GET
+#     headers:
+#       Cookie: "PVEAuthCookie={{ pve_node_ticket.json.data.ticket }}"
+#     body_format: form-urlencoded
+#     return_content: yes
+#     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+#   loop: "{{ pve_node_list.json.data }}"
+#   register: pve_ct_list
+#   # Output is very noisey
+#   no_log: True
+
+# # - debug:
+# #     var: pve_ct_list
+
+# - name: Compile list of all vms in cluster
+#   set_fact:
+#     pve_vm_list_clean: "{{ item.json.data }}"
+#   loop: "{{ pve_vm_list.results }}"
+#   no_log: false
 
 # - debug:
-#     var: pve_vm_list
+#     var: pve_vm_list_clean
 
-- name: Get list of existing containers for each node
-  uri:
-    url: "https://{{ pve_node }}:{{ pve_api_port }}/api2/json/nodes/{{ item.node }}/lxc"
-    method: GET
-    headers:
-      Cookie: "PVEAuthCookie={{ pve_node_ticket.json.data.ticket }}"
-    body_format: form-urlencoded
-    return_content: yes
-    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
-  loop: "{{ pve_node_list.json.data }}"
-  register: pve_ct_list
-  # Output is very noisey
-  no_log: True
+# # - name: VM already exists
+# #   set_fact:
+# #     pve_container_exists: True
+# #   when: pve_vm_hostname in pve_vm_list_clean|json_query('[*].name')
 
-# - debug:
-#     var: pve_ct_list
+# # - name: VM does not exist
+# #   set_fact:
+# #     pve_container_exists: False
+# #   when: pve_vm_hostname not in pve_vm_list_clean|json_query('[*].name')
 
-- name: Compile list of all vms in cluster
-  set_fact:
-    pve_vm_list_clean: "{{ item.json.data }}"
-  loop: "{{ pve_vm_list.results }}"
-  no_log: false
+# # - name: Compile list of all containers in cluster
+# #   set_fact:
+# #     pve_ct_list_clean: "{{ pve_ct_list_clean + item.json.data }}"
+# #   loop: "{{ pve_ct_list.results }}"
+# #   no_log: true
 
-- debug:
-    var: pve_vm_list_clean
+# # - name: Container already exists
+# #   set_fact:
+# #     pve_container_exists: True
+# #   when: pve_ct_hostname in pve_ct_list_clean|json_query('[*].name')
 
-# - name: VM already exists
-#   set_fact:
-#     pve_container_exists: True
-#   when: pve_vm_hostname in pve_vm_list_clean|json_query('[*].name')
+# # - name: Container does not exist
+# #   set_fact:
+# #     pve_container_exists: False
+# #   when: pve_ct_hostname not in pve_ct_list_clean|json_query('[*].name')
 
-# - name: VM does not exist
-#   set_fact:
-#     pve_container_exists: False
-#   when: pve_vm_hostname not in pve_vm_list_clean|json_query('[*].name')
-
-# - name: Compile list of all containers in cluster
-#   set_fact:
-#     pve_ct_list_clean: "{{ pve_ct_list_clean + item.json.data }}"
-#   loop: "{{ pve_ct_list.results }}"
-#   no_log: true
-
-# - name: Container already exists
-#   set_fact:
-#     pve_container_exists: True
-#   when: pve_ct_hostname in pve_ct_list_clean|json_query('[*].name')
-
-# - name: Container does not exist
-#   set_fact:
-#     pve_container_exists: False
-#   when: pve_ct_hostname not in pve_ct_list_clean|json_query('[*].name')
-
-- name: Get VM current state
-  community.general.proxmox_kvm:
-    api_user: "{{ pve_apiuser }}"
-    api_password: "{{ pve_apipass }}"
-    api_host: proxmox
-    name: 2004clone-cloud-init
-    node: proxmox
-    state: current
-# - name: Print all available facts
-#   ansible.builtin.debug:
-#     var: ansible_facts
+# - name: Get VM current state
+#   community.general.proxmox_kvm:
+#     api_user: "{{ pve_apiuser }}"
+#     api_password: "{{ pve_apipass }}"
+#     api_host: proxmox
+#     name: 2004clone-cloud-init
+#     node: proxmox
+#     state: current
+# # - name: Print all available facts
+# #   ansible.builtin.debug:
+# #     var: ansible_facts
