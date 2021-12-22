@@ -5,7 +5,7 @@
     state: present
 
 - name: Update apt
-  include_tasks: ../../common/tasks/main.yml
+  include_tasks: ../../000_common/tasks/main.yml
 
 - name: Ensure lsb_release is installed.
   package: name=lsb-release state=present
@@ -13,6 +13,7 @@
 - name: Get Linux Release
   shell: lsb_release -cs
   register: lsb_release
+  changed_when: false
 
 - debug:
     var: lsb_release.stdout
@@ -23,7 +24,7 @@
     state: present
 
 - name: Update apt
-  include_tasks: ../../common/tasks/main.yml
+  include_tasks: ../../000_common/tasks/main.yml
 
 - name: Ensure packer is installed.
   package: name=packer state=present
