@@ -1,41 +1,93 @@
 ---
+# - debug:
+#     var: roles
+# - debug:
+#     var: has_role
+
 - name: Check if role exists
-  shell: pveum role list --output-format=json | jq -r "any(.[].roleid; . == \"{{ proxmox_role_name | quote }}\")"
+  shell: pveum role list --output-format=json | jq -r "any(.[].roleid; . == \"{{ item.proxmox_role_name | quote }}\")"
   register: has_role
-  changed_when: has_role.stdout == "false"
+  changed_when: false
+  loop: "{{ roles }}"
+  loop_control:
+    index_var: i
+# - debug:
+#     var: has_role
+
+# - name: Set exists into roles dict
+#   set_fact:
+#     roles: "{{ roles[item.proxmox_user_name] | combine({ 'exists': password.stdout }) }}"
+#   loop: "{{ has_role.results }}"
 
 - name: Add role if not exists
-  shell: pveum role add {{ proxmox_role_name }} -privs "{{ privs }}"
-  when: has_role.stdout == "false"
+  shell: pveum role add {{ item.proxmox_role_name }} -privs "{{ item.privs }}"
+  when: has_role.results[i].stdout == 'false'
+  loop: "{{ roles }}"
+  loop_control:
+    index_var: i
+# - debug:
+#     var: has_role
 
-- name: Get password for ansible user
+- name: Get password for ansible user - Generate if not exists
   local_action:
-    shell pass Homelab/proxmox/users/ansible;
-    # password=$( pass Homelab/proxmox/users/ansible | cut -d$'\n' -f1);
-    # echo $password;
-  # local_action:
-  #   module: shell
-  #   _raw_params: |
-  #     pass Homelab/proxmox/users/ansible
-  #     password=$( pass Homelab/proxmox/users/ansible | cut -d$'\n' -f1)
-  #     echo $password
+    module: shell
+    _raw_params: |
+      password=$( pass Homelab/proxmox/users/{{ item.proxmox_user_name | quote }} 2> /dev/null | sed '1p;d' );
+      if [ -z $password ] ; then
+        pass generate -n Homelab/proxmox/users/{{ item.proxmox_user_name | quote }} 2>&1 > /dev/null;
+        password=$( pass Homelab/proxmox/users/{{ item.proxmox_user_name | quote }} | sed '1p;d' );
+      fi
+      echo $password;
   register: password
   changed_when: false
+  loop: "{{ users }}"
+  loop_control:
+    index_var: i
+# - debug:
+#     var: users
+# - debug:
+#     var: password
+
+# https://stackoverflow.com/questions/61544406/ansible-merge-2-arrays
+- name: Set password into users dict
+  set_fact:
+    users_pw: "{{ users_pw + [item | combine({ 'password': password.results[i].stdout })] }}"
+  vars:
+    users_pw: []
+  loop: "{{ users }}"
+  loop_control:
+    index_var: i
+# - debug:
+#     var: users_pw
 
 - name: Check if user exists
-  shell: pveum user list --output-format=json | jq -r "any(.[].userid; . == \"{{ proxmox_user_name | quote }}\")"
+  shell: pveum user list --output-format=json | jq -r "any(.[].userid; . == \"{{ item.proxmox_user_name | quote }}\")"
   register: has_user
-  changed_when: has_user.stdout == "false"
+  changed_when: false
+  loop: "{{ users_pw }}"
+  loop_control:
+    index_var: i
+# - debug:
+#     var: has_user
 
 - name: Add user if not exists
-  shell: pveum user add "{{ proxmox_user_name }}" --password "{{ password.stdout }}"
-  when: has_user.stdout == "false"
+  shell: pveum user add "{{ item.proxmox_user_name }}" --password "{{ item.password }}"
+  when: has_user.results[i].stdout == "false"
+  loop: "{{ users_pw }}"
+  loop_control:
+    index_var: i
 
 - name: Check if ACL state is correct
-  shell: pveum acl list --output-format=json | jq -r ". | any((.ugid == \"{{ proxmox_user_name | quote }}\") and .roleid == \"{{ proxmox_role_name | quote }}\")"
+  shell: pveum acl list --output-format=json | jq -r ". | any((.ugid == \"{{ item.proxmox_user_name | quote }}\") and .roleid == \"{{ item.proxmox_role_name | quote }}\")"
   register: has_acl
-  changed_when: has_acl.stdout == "false"
+  changed_when: false
+  loop: "{{ users_pw }}"
+  loop_control:
+    index_var: i
 
 - name: Modify ACL
-  shell: pveum aclmod / -user "{{ proxmox_user_name }}" -role "{{ proxmox_role_name }}"
-  when: has_acl.stdout == "false"
+  shell: pveum aclmod / -user "{{ item.proxmox_user_name }}" -role "{{ item.proxmox_role_name }}"
+  when: has_acl.results[i].stdout == "false"
+  loop: "{{ users_pw }}"
+  loop_control:
+    index_var: i

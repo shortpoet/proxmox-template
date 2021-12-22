@@ -5,8 +5,14 @@
   roles:
     - ../roles/020_proxmox_node_users
   vars:
-    proxmox_role_name: TerraformProv
-    privs: VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit
-    proxmox_user_name: terraform-prov@pve
+    roles:
+      - proxmox_role_name: TerraformProv
+        privs: VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit
+    users:
+      - proxmox_user_name: terraform-prov@pve
+        proxmox_role_name: TerraformProv
+      - proxmox_user_name: notroot@pve
+        proxmox_role_name: Administrator
+
     # packages_to_install:
     #   - "jq"
