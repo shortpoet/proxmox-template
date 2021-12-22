@@ -30,3 +30,12 @@
 - name: Add user if not exists
   shell: pveum user add "{{ proxmox_user_name }}" --password "{{ password.stdout }}"
   when: has_user.stdout == "false"
+
+- name: Check if ACL state is correct
+  shell: pveum acl list --output-format=json | jq -r ". | any((.ugid == \"{{ proxmox_user_name | quote }}\") and .roleid == \"{{ proxmox_role_name | quote }}\")"
+  register: has_acl
+  changed_when: has_acl.stdout == "false"
+
+- name: Modify ACL
+  shell: pveum aclmod / -user "{{ proxmox_user_name }}" -role "{{ proxmox_role_name }}"
+  when: has_acl.stdout == "false"
