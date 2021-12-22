@@ -7,29 +7,7 @@
   shell: pveum role list --output-format=json | jq -r "any(.[].roleid; . == \"{{ proxmox_role_name }}\")"
   register: has_role
   changed_when: has_role.stdout == "false"
-- debug:
-    var: has_role.stdout
-# - name: Check if role exists
-#   vars:
-#     message: hackec > /tmp/hacked && echo hacked
-#     proxmox_role_name: TerraformProv
-#   shell: |
-#     # echo {{ message | quote }} > /tmp/test_file
-#     PROXMOX_ROLE_NAME="TerraformProv"
-#     # proxmox_role_name seems to be a reserved ansible variable
-#     PROXMOX_ROLE_NAME={{ proxmox_role_name }}
-#     HAS_ROLE=$(pveum role list --output-format=json | jq -r "any(.[].roleid; . == \"{{ proxmox_role_name }}\")")
-#     # HAS_ROLE=$(pveum role list --output-format=json | jq -r "any(.[].roleid; . == \"$PROXMOX_ROLE_NAME\")")
-#     # HAS_ROLE=$(pveum role list --output-format=json | jq -r 'any(.[].roleid; . == "TerraformProv")')
-#     ROLES=$(pveum role list --output-format=json | jq -r '.[].roleid')
-#     # HAS_ROLE=$(pveum role list --output-format=json | jq -r 'any(.[].roleid; . == "{{ proxmox_role_name }}")')
-#     echo $HAS_ROLE
-#     # [[ " ${ROLES[@]} " =~ " ${PROXMOX_ROLE_NAME} " ]] && echo "true" || echo "false"
-#     # [[ " ${ROLES[*]} " =~ " ${TerraformProv} " ]] && echo "true" || echo "false"
-#   register: has_role2
 
-# - debug:
-#     var: has_role2.stdout
 - name: Add role if not exists
   vars:
     proxmox_role_name: TerraformProv
