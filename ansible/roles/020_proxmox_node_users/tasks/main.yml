@@ -1,17 +1,10 @@
 ---
 - name: Check if role exists
-  vars:
-    message: hackec > /tmp/hacked && echo hacked
-    proxmox_role_name: TerraformProv
-  # shell: pveum role list --output-format=json | jq -r 'any( .[].roleid; . == \" {{ proxmox_role_name }} \" )'
   shell: pveum role list --output-format=json | jq -r "any(.[].roleid; . == \"{{ proxmox_role_name | quote }}\")"
   register: has_role
   changed_when: has_role.stdout == "false"
 
 - name: Add role if not exists
-  vars:
-    proxmox_role_name: TerraformProv
-    privs: VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit
   shell: pveum role add {{ proxmox_role_name }} -privs "{{ privs }}"
   when: has_role.stdout == "false"
 
@@ -30,15 +23,10 @@
   changed_when: false
 
 - name: Check if user exists
-  vars:
-    proxmox_user_name: terraform-prov@pve
-  shell: pveum role list --output-format=json | jq -r "any(.[].userid; . == \"{{ proxmox_user_name | quote }}\")"
+  shell: pveum user list --output-format=json | jq -r "any(.[].userid; . == \"{{ proxmox_user_name | quote }}\")"
   register: has_user
   changed_when: has_user.stdout == "false"
-- debug:
-    var: has_user.stdout
+
 - name: Add user if not exists
-  vars:
-    proxmox_user_name: terraform-prov@pve
   shell: pveum user add "{{ proxmox_user_name }}" --password "{{ password.stdout }}"
   when: has_user.stdout == "false"
