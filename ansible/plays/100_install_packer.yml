@@ -2,4 +2,4 @@
 - hosts: proxmox
   gather_facts: true
   roles:
-    - ../roles/remove_packer
+    - ../roles/100_install_packer
