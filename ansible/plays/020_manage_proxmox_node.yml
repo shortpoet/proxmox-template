@@ -1,0 +1,6 @@
+---
+- name: "Manage proxmox node(s)"
+  hosts: "proxmox"
+  gather_facts: false
+  roles:
+    - ../roles/020_proxmox_node_users
