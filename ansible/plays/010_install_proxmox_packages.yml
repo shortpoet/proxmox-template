@@ -1,0 +1,9 @@
+---
+- name: "Prep proxmox node(s)"
+  hosts: "proxmox"
+  gather_facts: false
+  vars:
+    packages_to_install:
+      - "jq"
+  roles:
+    - ../roles/010_proxmox_node_packages
