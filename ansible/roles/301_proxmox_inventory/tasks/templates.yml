@@ -1,0 +1,17 @@
+---
+- name: Get list available templates on node
+  uri:
+    url: "https://{{ pve_node }}:{{ pve_api_port }}/api2/json/nodes/{{ pve_node }}/storage/{{ pve_ct_storage_location }}/content"
+    method: GET
+    headers:
+      Cookie: "PVEAuthCookie={{ pve_node_ticket.json.data.ticket }}"
+    body_format: form-urlencoded
+    return_content: yes
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+  register: pve_ct_template_list
+
+- name: Determine if template is available on node
+  set_fact:
+    pve_ct_template_exists: true
+  loop: "{{ pve_ct_template_list.json.data }}"
+  when: pve_template == item.volid

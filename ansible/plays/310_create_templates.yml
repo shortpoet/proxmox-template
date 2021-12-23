@@ -1,0 +1,39 @@
+---
+- hosts: proxmox
+  gather_facts: true
+  vars:
+    pve_node: proxmox
+    pve_apiuser: automation@pve
+    pve_apipass: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
+    get_vms: false
+    get_containers: true
+    vms:
+      - ubuntu:
+          - name: ubuntu-2104
+            url: https://cloud-images.ubuntu.com/hirsute/current/hirsute-server-cloudimg-amd64.img
+      #     - name: ubuntu-2004
+      #       url: https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
+      #     - name: ubuntu-1804
+      #       url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
+      # - debian:
+      #     - name: debian-10
+      #       url: http://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.qcow2
+      #     - name: debian-9
+      #       url: http://cdimage.debian.org/cdimage/openstack/current-9/debian-9-openstack-amd64.qcow2
+      # - centos:
+      #     - name: centos-8-generic-cloud
+      #       url: https://cloud.centos.org/centos/8/x86_64/images/CentOS-8-GenericCloud-8.4.2105-20210603.0.x86_64.qcow2
+      #     - name: centos-8-ec2
+      #       url: https://cloud.centos.org/centos/8/x86_64/images/CentOS-8-ec2-8.4.2105-20210603.0.x86_64.qcow2
+      #     - name: centos-8-container
+      #       url: https://cloud.centos.org/centos/8/x86_64/images/CentOS-8-Container-8.4.2105-20210603.0.x86_64.tar.xz
+      #     - name: centos-7-generic-cloud
+      #       url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-2111.qcow2
+      #       last_modified: 2021-11-16 08:44
+
+  roles:
+    - ../roles/300_proxmox_auth
+    - ../roles/310_proxmox_vms_create
+# - name: Print all available facts
+#   ansible.builtin.debug:
+#     var: ansible_facts

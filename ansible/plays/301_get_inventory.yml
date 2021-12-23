@@ -9,9 +9,10 @@
     pve_apipass: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
     # pve_apipass: '{{ lookup("env", "PROXMOX_PASSWORD") }}' # root
     get_vms: false
-    get_containers: false
+    get_containers: true
   roles:
-    - ../roles/300_proxmox_inventory
+    - ../roles/300_proxmox_auth
+    - ../roles/301_proxmox_inventory
 # - name: Print all available facts
 #   ansible.builtin.debug:
 #     var: ansible_facts

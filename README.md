@@ -13,7 +13,27 @@
 
 - [Get images](https://docs.openstack.org/image-guide/obtain-images.html)
 
+### Ubuntu
+
+- get most recent release url
+
+```bash
+release_codename='Focal Fossa'
+sstream-query --json --max=1 --keyring=/usr/share/keyrings/ubuntu-cloudimage-keyring.gpg http://cloud-images.ubuntu.com/releases/streams/v1/com.ubuntu.cloud:released:download.sjson arch=amd64 release_codename=$release_codename ftype='disk1.img' | jq -r '.[].item_url'
+```
+
+- query all releases
+
+```bash
+release_codename='Focal Fossa'
+sstream-query --json --keyring=/usr/share/keyrings/ubuntu-cloudimage-keyring.gpg http://cloud-images.ubuntu.com/releases/streams/v1/com.ubuntu.cloud:released:download.sjson arch=amd64 release_codename=$release_codename ftype='disk1.img' | jq -r '.[].version_name'
+```
+
+- [Index of /releases/streams/v1](https://cloud-images.ubuntu.com/releases/streams/v1/)
 - [Ubuntu 20.04 LTS (Focal Fossa) Daily Build [20211216]](https://cloud-images.ubuntu.com/focal/current/)
+  - [img dl](https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img)
+- [Ubuntu 20.04 LTS (Focal Fossa) [20211129]](https://cloud-images.ubuntu.com/releases/focal/release-20211129/)
+  - [img dl](https://cloud-images.ubuntu.com/releases/focal/release-20211129/ubuntu-20.04-server-cloudimg-amd64.img)
 
 ## test ansible
 
@@ -43,4 +63,17 @@ EOT
 
 ```bash
 ansible all -m ping
+```
+
+## Proxmox cli commands
+
+```bash
+pveum role list --output-format=json | jq -r "any(.[].roleid; . == \"Automation\")"
+pveam available
+pveam list local
+pveam list vmstore
+qm list
+pvesh ls /nodes/proxmox/qemu
+pvesh ls /nodes/proxmox/qemu/9002/config
+ls /dev/mapper # VMs-vm--{vmId}--disk--{diskIdx|cloudinit}
 ```

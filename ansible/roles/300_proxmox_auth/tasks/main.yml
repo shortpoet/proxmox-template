@@ -1,0 +1,12 @@
+---
+- name: Get proxmox api auth ticket
+  uri:
+    url: "https://{{ pve_node }}:{{ pve_api_port }}/api2/json/access/ticket"
+    method: POST
+    body:
+      username: "{{ pve_apiuser }}"
+      password: "{{ pve_apipass }}"
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+    follow_redirects: all
+    body_format: form-urlencoded
+  register: pve_node_ticket

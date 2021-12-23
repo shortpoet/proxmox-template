@@ -1,0 +1,29 @@
+---
+- name: Create virtual machines
+  proxmox_kvm:
+    api_user: "{{ proxmox.api_user }}"
+    api_password: "{{ proxmox.api_password }}"
+    api_host: "{{ proxmox.api_host }}"
+    node: "{{ item.value.node }}"
+    name: "{{ item.key }}"
+    net: "{{ item.value.net | default(proxmox_vms_defaults.net) }}"
+    scsihw: "{{ item.value.scsihw | default(proxmox_vms_defaults.scsihw) }}"
+    virtio: "{{ item.value.virtio | default(proxmox_vms_defaults.virtio) }}"
+    cores: "{{ item.value.cores | default(proxmox_vms_defaults.cores) }}"
+    memory: "{{ item.value.memory_size | default(proxmox_vms_defaults.memory_size) }}"
+    balloon: "{{ item.value.balloon | default(proxmox_vms_defaults.balloon) }}"
+    vga: "qxl"
+    ostype: "{{ item.value.ostype | default(proxmox_vms_defaults.ostype) }}"
+    # Look for deploy-args-file of the vm and remove all newlines. If not found take the
+    # template-file and remove all newlines (all commands in one line). See ansible filter documentation.
+    args: "{{ lookup('template', 'deploy-args-'~distributions[item.key]~'.j2'
+      if deploy_file_exists_list[item.key] else proxmox_vms_defaults.deploy_args_template) |
+      replace('\n', '') }}"
+    cpu: "{{ item.value.cpu | default(proxmox_vms_defaults.cpu) }}"
+    onboot: "{{ item.value.onboot | default(proxmox_vms_defaults.onboot) }}"
+    state: present
+  with_dict: "{{ vms }}"
+  loop_control:
+    pause: 10
+  notify: sleep
+  register: created_vms_pve
