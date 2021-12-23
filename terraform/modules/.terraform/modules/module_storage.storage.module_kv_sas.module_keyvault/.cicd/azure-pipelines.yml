@@ -1,0 +1,293 @@
+name: '$(Build.DefinitionName)_$(Build.BuildId)'
+
+parameters:
+  - name: 'Environment'
+    displayName: 'Environment'
+    type: string
+    default: 'Stg'
+    values:
+    - 'Stg'
+    - 'Dev'
+    - 'Prod'
+  - name: 'BackendProvider'
+    displayName: 'Backend Provider'
+    type: string
+    default: 'TerraformCloud'
+    values:
+    - 'TerraformCloud'
+    - 'AzureRm'
+
+variables:
+- group: Sparq.ARM.Service.Connection
+- group: Terraform.Sparq
+- name: system.debug
+  value: true
+- name: 'terraformDirectory'
+  value: '$(Build.SourcesDirectory)/.iac'
+- name: 'subscriptionConnection'
+  value: '$(Sp.Sparq.${{ parameters.Environment }}.Infra)'
+
+trigger:
+  paths:
+    exclude:
+      - README.md
+      - .gitignore
+
+stages:
+  - stage: 'terraformConfig'
+    displayName: 'Configure Terraform'
+    variables:
+    - ${{ if eq(parameters['Environment'], 'Dev') }}:
+      - group: Sparq.Dev.ARM.Service.Principal
+    - ${{ if eq(parameters['Environment'], 'stg') }}:
+      - group: Sparq.Stg.ARM.Service.Principal
+    - ${{ if eq(parameters['Environment'], 'prod') }}:
+      - group: Sparq.Prod.ARM.Service.Principal
+    jobs:
+    - job: 'runTerraform'
+      displayName: 'Run Terraform'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - task: PowerShell@2
+          name: 'checkTerraform'
+          displayName: 'Check Terraform'
+          env:
+            ARM_TENANT_ID: $(Facilis.ARM.Tenant.Id)
+            ARM_SUBSCRIPTION_ID: $(Sparq-ARM-Subscription-Id)
+            ARM_CLIENT_ID: $(Sparq-Infra-ARM-Service-Principal-App-Id)
+            ARM_CLIENT_SECRET: $(Sparq-Infra-ARM-Service-Principal-App-Password)
+          inputs:
+            targetType: 'inline'
+            script: |
+              terraform --version
+              az --version
+        - task: PowerShell@2
+          name: 'loadTerraformToken'
+          displayName: 'Load Terraform Token'
+          inputs:
+            targetType: inline
+            script: |
+              echo "credentials `"app.terraform.io`" {`n  token = `"$(Terraform.Cloud.Teams.API.Token)`" `n}" > .terraformrc
+            workingDirectory: '$(System.WorkFolder)/../'
+        - task: PowerShell@2
+          displayName: 'Replace Values in Main File'
+          env:
+            ACCESS_TOKEN: $(System.AccessToken)          
+          inputs:
+            targetType: 'inline'
+            script: |
+              # replace values
+              $mainFile=(Get-ItemProperty main.tf).FullName
+              (Get-Content $mainFile) -replace '##PAT_TOKEN##', "$Env:ACCESS_TOKEN" | Out-File $mainFile
+              cat $mainFile
+              # echo "Host ssh.dev.azure.com`n`tIdentityFile ~/.ssh/id_rsa-fg_sparq_service_terraform@facilisgroup`n`tIdentitiesOnly yes" > ~/.ssh/config
+            workingDirectory: '$(terraformDirectory)'
+        - task: Bash@3
+          name: 'installSSHKeyBash'
+          displayName: 'Install SSH Key Bash'
+          env:
+            ARM_TENANT_ID: $(Facilis.ARM.Tenant.Id)
+            ARM_SUBSCRIPTION_ID: $(Sparq-ARM-Subscription-Id)
+            ARM_CLIENT_ID: $(Sparq-Infra-ARM-Service-Principal-App-Id)
+            ARM_CLIENT_SECRET: $(Sparq-Infra-ARM-Service-Principal-App-Password)
+            SUB_CONN: $(subscriptionConnection)
+            # TF_LOG: debug
+          inputs:
+            targetType: inline
+            script: |
+              az login --service-principal -u $ARM_CLIENT_ID --password=$ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID --allow-no-subscriptions
+              PRIVATE_KEY_SECRET="Azure-DevOps-Ssh-Private-Key-Commas"
+              KNOWN_HOSTS_SECRET="Azure-DevOps-Ssh-Known-Hosts"
+              KV_NAME="kv-sparq-stg-infra"
+              az account show
+              echo $SUB_CONN
+              pwd
+              ls ~
+              # az keyvault secret show --name "$PRIVATE_KEY_SECRET-File" --vault-name $KV_NAME --query "value"
+              mkdir ~/.ssh
+              az keyvault secret download --name "$PRIVATE_KEY_SECRET-File" --vault-name $KV_NAME --file ~/.ssh/id_rsa-fg_sparq_service_terraform@facilisgroup
+              pwd
+              ls ~
+              ls ~/.ssh
+              az keyvault secret show --name "$KNOWN_HOSTS_SECRET" --vault-name "$KV_NAME" --query "value" > ~/.ssh/known_hosts
+              cat ~/.ssh/known_hosts
+              chmod 600 ~/.ssh/id_rsa-fg_sparq_service_terraform@facilisgroup ~/.ssh/known_hosts
+              # eval $(ssh-agent -s)
+              # ssh-add ~/.ssh/id_rsa-fg_sparq_service_terraform@facilisgroup
+              # ssh -i ~/.ssh/id_rsa-fg_sparq_service_terraform@facilisgroup -o UserKnownHostsFile=~/.ssh/known_hosts
+        # - task: InstallSSHKey@0
+        #   name: 'installSshKey'
+        #   displayName: 'Install an SSH key'
+        #   inputs:
+        #     hostName: 'ssh.dev.azure.com'
+        #     knownHostsEntry: '$(Azure-DevOps-Ssh-Known-Hosts)' 
+        #     sshPublicKey: '$(Azure-DevOps-Ssh-Public-Key)' 
+        #     # sshPassphrase: '$(git_ssh_pass)' 
+        #     sshKeySecureFile: 'id_rsa-fg_sparq_service_terraform@facilisgroup'
+        # - task: AzureCLI@2
+        #   name: 'installSSHKey'
+        #   displayName: 'Install SSH Key'
+        #   env:
+        #     ARM_TENANT_ID: $(Facilis.ARM.Tenant.Id)
+        #     ARM_SUBSCRIPTION_ID: $(Sparq-ARM-Subscription-Id)
+        #     ARM_CLIENT_ID: $(Sparq-Infra-ARM-Service-Principal-App-Id)
+        #     ARM_CLIENT_SECRET: $(Sparq-Infra-ARM-Service-Principal-App-Password)
+        #     SUB_CONN: $(subscriptionConnection)
+        #     # TF_LOG: debug
+        #   inputs:
+        #     azureSubscription: 'sp-sparq-stg-infra' # works bec not secret var
+        #     scriptType: bash
+        #     scriptLocation: inlineScript
+        #     inlineScript: |
+        #       PRIVATE_KEY_SECRET="Azure-DevOps-Ssh-Private-Key-Commas"
+        #       KV_NAME="kv-sparq-stg-infra"
+        #       az account show
+        #       echo $SUB_CONN
+        #       az keyvault secret show --name "$PRIVATE_KEY_SECRET-File" --vault-name $KV_NAME --query "value"
+        #       # az keyvault secret download --name "$PRIVATE_KEY_SECRET-File" --vault-name $KV_NAME --file ~/.ssh/id_ed25519
+        #       # ssh-keyscan ssh.dev.azure.com > known_hosts
+        #       # chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+        #       # ssh -i ~/.ssh/id_ed25519 -o UserKnownHostsFile=~/.ssh/known_hosts
+        #     addSpnToEnvironment: true
+        #     useGlobalConfig: true
+        #     failOnStandardError: true
+        #     powerShellIgnoreLASTEXITCODE: false
+        #     workingDirectory: '$(System.WorkFolder)/../'
+        - task: AzureCLI@2
+          name: 'terraformInit'
+          displayName: 'Run Terraform Init'
+          env:
+            ARM_TENANT_ID: $(Facilis.ARM.Tenant.Id)
+            ARM_SUBSCRIPTION_ID: $(Sparq-ARM-Subscription-Id)
+            ARM_CLIENT_ID: $(Sparq-Infra-ARM-Service-Principal-App-Id)
+            ARM_CLIENT_SECRET: $(Sparq-Infra-ARM-Service-Principal-App-Password)
+            # GIT_SSH_COMMAND: "ssh -Tv" # verbose output
+            GIT_SSH_COMMAND: "ssh -Tv -i ~/.ssh/id_rsa-fg_sparq_service_terraform@facilisgroup -o UserKnownHostsFile=~/.ssh/known_hosts"
+            # GIT_SSH_COMMAND: "ssh -Tv"
+            # TF_LOG: debug
+          inputs:
+            azureSubscription: $(subscriptionConnection) # works bec not secret var
+            scriptType: pscore
+            scriptLocation: inlineScript
+            inlineScript: |
+              # Propagate pipeline Service Principal as Terraform variables if not present as env vars
+              $env:ARM_CLIENT_ID       ??= $env:servicePrincipalId
+              $env:ARM_CLIENT_SECRET   ??= $env:servicePrincipalKey
+              $env:ARM_TENANT_ID       ??= $env:tenantId
+              # Propagate from Azure CLI context
+              $env:ARM_TENANT_ID       ??= $(az account show --query tenantId -o tsv)
+              $env:ARM_SUBSCRIPTION_ID ??= $(az account show --query id -o tsv)
+              # ls
+              # cat $(System.WorkFolder)/../.terraformrc           
+              # Put Terraform commands after this line
+              if ("${{ parameters.BackendProvider }}" -eq "TerraformCloud") {
+                terraform init
+              } else {
+                terraform init -backend-config="./backends/backend-azure.tf"
+              }
+              # ls
+            addSpnToEnvironment: true
+            useGlobalConfig: true
+            failOnStandardError: true
+            powerShellIgnoreLASTEXITCODE: false
+            workingDirectory: '$(terraformDirectory)'
+        - task: AzureCLI@2
+          name: 'terraformPlan'
+          displayName: 'Run Terraform Plan'
+          env:
+            ARM_TENANT_ID: $(Facilis.ARM.Tenant.Id)
+            ARM_SUBSCRIPTION_ID: $(Sparq-ARM-Subscription-Id)
+            ARM_CLIENT_ID: $(Sparq-Infra-ARM-Service-Principal-App-Id)
+            ARM_CLIENT_SECRET: $(Sparq-Infra-ARM-Service-Principal-App-Password)
+          inputs:
+            azureSubscription: $(subscriptionConnection) # works bec not secret var
+            scriptType: pscore
+            scriptLocation: inlineScript
+            inlineScript: |
+              # Propagate pipeline Service Principal as Terraform variables if not present as env vars
+              $env:ARM_CLIENT_ID       ??= $env:servicePrincipalId
+              $env:ARM_CLIENT_SECRET   ??= $env:servicePrincipalKey
+              $env:ARM_TENANT_ID       ??= $env:tenantId
+              # Propagate from Azure CLI context
+              $env:ARM_TENANT_ID       ??= $(az account show --query tenantId -o tsv)
+              $env:ARM_SUBSCRIPTION_ID ??= $(az account show --query id -o tsv) 
+              gci env: | Format-Table -Wrap -AutoSize
+              # Put Terraform commands after this line
+              if ("${{ parameters.BackendProvider }}" -eq "TerraformCloud") {
+                terraform plan -out deployment.tfplan
+              } else {
+                terraform plan -out deployment.tfplan
+              }
+              ls
+            addSpnToEnvironment: true
+            useGlobalConfig: true
+            failOnStandardError: true
+            powerShellIgnoreLASTEXITCODE: false
+            workingDirectory: '$(terraformDirectory)'
+        - task: AzureCLI@2
+          name: 'terraformShow'
+          displayName: 'Run Terraform Show'
+          env:
+            ARM_TENANT_ID: $(Facilis.ARM.Tenant.Id)
+            ARM_SUBSCRIPTION_ID: $(Sparq-ARM-Subscription-Id)
+            ARM_CLIENT_ID: $(Sparq-Infra-ARM-Service-Principal-App-Id)
+            ARM_CLIENT_SECRET: $(Sparq-Infra-ARM-Service-Principal-App-Password)
+          inputs:
+            azureSubscription: $(subscriptionConnection) # works bec not secret var
+            scriptType: pscore
+            scriptLocation: inlineScript
+            inlineScript: |
+              # Propagate pipeline Service Principal as Terraform variables if not present as env vars
+              $env:ARM_CLIENT_ID       ??= $env:servicePrincipalId
+              $env:ARM_CLIENT_SECRET   ??= $env:servicePrincipalKey
+              $env:ARM_TENANT_ID       ??= $env:tenantId
+              # Propagate from Azure CLI context
+              $env:ARM_TENANT_ID       ??= $(az account show --query tenantId -o tsv)
+              $env:ARM_SUBSCRIPTION_ID ??= $(az account show --query id -o tsv)              
+              # Put Terraform commands after this line
+              if ("${{ parameters.BackendProvider }}" -eq "TerraformCloud") {
+                terraform show deployment.tfplan
+              } else {
+                terraform show deployment.tfplan
+              }
+              ls
+            addSpnToEnvironment: true
+            useGlobalConfig: true
+            failOnStandardError: true
+            powerShellIgnoreLASTEXITCODE: false
+            workingDirectory: '$(terraformDirectory)'
+        # TODO add checks for different apply/destory conditions
+        # https://github.com/russmckendrick/DevOpsTerraformPipeline/blob/main/azure-pipelines.yml
+        - task: AzureCLI@2
+          name: 'terraformApply'
+          displayName: 'Run Terraform Apply'
+          env:
+            ARM_TENANT_ID: $(Facilis.ARM.Tenant.Id)
+            ARM_SUBSCRIPTION_ID: $(Sparq-ARM-Subscription-Id)
+            ARM_CLIENT_ID: $(Sparq-Infra-ARM-Service-Principal-App-Id)
+            ARM_CLIENT_SECRET: $(Sparq-Infra-ARM-Service-Principal-App-Password)
+          inputs:
+            azureSubscription: $(subscriptionConnection) # works bec not secret var
+            scriptType: pscore
+            scriptLocation: inlineScript
+            inlineScript: |
+              # Propagate pipeline Service Principal as Terraform variables if not present as env vars
+              $env:ARM_CLIENT_ID       ??= $env:servicePrincipalId
+              $env:ARM_CLIENT_SECRET   ??= $env:servicePrincipalKey
+              $env:ARM_TENANT_ID       ??= $env:tenantId
+              # Propagate from Azure CLI context
+              $env:ARM_TENANT_ID       ??= $(az account show --query tenantId -o tsv)
+              $env:ARM_SUBSCRIPTION_ID ??= $(az account show --query id -o tsv)              
+              # Put Terraform commands after this line
+              if ("${{ parameters.BackendProvider }}" -eq "TerraformCloud") {
+                terraform apply -auto-approve deployment.tfplan
+              } else {
+                terraform show -auto-approve deployment.tfplan
+              }
+              ls
+            addSpnToEnvironment: true
+            useGlobalConfig: true
+            failOnStandardError: true
+            powerShellIgnoreLASTEXITCODE: false
+            workingDirectory: '$(terraformDirectory)'

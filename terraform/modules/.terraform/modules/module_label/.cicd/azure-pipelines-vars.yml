@@ -1,0 +1,166 @@
+name: '$(Build.DefinitionName)_$(Build.BuildId)'
+
+variables:
+- group: Sparq.Dev.ARM.Service.Principal
+- group: Sparq.Dev.ARM.Service.Connection
+- name: system.debug
+  value: true
+- name: 'terraformDirectory'
+  value: '$(Build.SourcesDirectory)/.iac'
+- name: 'SUB_CONN'
+  value: $(subscriptionConnection)
+- name: 'AZ_SUB'
+  value: $(azSub)
+parameters:
+  - name: 'environment'
+    displayName: 'Environment'
+    type: string
+    default: 'dev'
+    values:
+    - 'stg'
+    - 'dev'
+    - 'prod'
+
+trigger:
+  paths:
+    exclude:
+      - README.md
+      - .gitignore
+      - scripts
+
+stages:
+  - stage: 'terraformConfig'
+    displayName: 'Configure Terraform'
+    jobs:
+    - job: 'checkTerraform'
+      displayName: 'Check Terraform'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - task: PowerShell@2
+          name: 'checkTerraform'
+          displayName: 'Check Terraform'
+          env:
+            ENV_SUB_CONN: $(subscriptionConnection)                  
+            ARM_TENANT_ID: $(ARM.Client.Id)
+            ARM_SUBSCRIPTION_ID: $(ARM.Client.Id)
+            ARM_CLIENT_ID: $(ARM.Client.Id)
+            ARM_CLIENT_SECRET: $(ARM.Client.Id)
+          inputs:
+            targetType: 'inline'
+            script: |
+              terraform --version
+              az --version
+              echo "env sub conn $env:ENV_SUB_CONN"
+              # echo "env sub conn2 $(ENV_SUB_CONN)" # doesn't work
+              echo "vars sub conn ${{ variables.SUB_CONN }}"
+              echo "subscription connection $(subscriptionConnection)"
+              $envSubConn=$env:ENV_SUB_CONN
+              # $envSubConn2=$(ENV_SUB_CONN) # doesn't work
+              echo '##vso[task.setvariable variable=CT_ENV_SUB_CONN;isOutput=true]$envSubConn'
+              # echo '##vso[task.setvariable variable=CT_ENV_SUB_CONN2;isOutput=true]$envSubConn2' # doesn't work
+              echo '##vso[task.setvariable variable=CT_VARS_SUB_CONN;isOutput=true]${{ variables.SUB_CONN }}'
+              echo '##vso[task.setvariable variable=SUBSCRIPTION_CONNECTION;isOutput=true]$(subscriptionConnection)'
+        - task: PowerShell@2
+          name: 'debug'
+          displayName: 'debug'
+          env:
+            SUB_CONN: $(subscriptionConnection)                  
+          inputs:
+            targetType: 'inline'
+            script: |
+              function GetSecret($secret){
+                  $length = $secret.ToCharArray().Length;
+                  if ($length -ge 2) {
+                      return $secret.substring(0,$length-1 )+"<-eliminate->"+$secret.substring($length-1,1)
+                  } elseif ($length -eq 1) {
+                      return $secret+"<-eliminate->"
+                  } else {
+                      return ""
+                  }
+              }
+              echo "env sub conn  $(checkTerraform.CT_ENV_SUB_CONN)"
+              # echo "env sub conn 2 $(checkTerraform.CT_ENV_SUB_CONN2)" # doesn't work
+              echo "vars sub conn $(checkTerraform.CT_VARS_SUB_CONN)"
+              echo "subscription connection $(checkTerraform.SUBSCRIPTION_CONNECTION)"
+              echo "sub conn striaght map $(SUB_CONN)"
+              echo "az sub striaght map $(AZ_SUB)"
+              echo "az sub striaght map length $(AZ_SUB).Length"
+              $secret=$Env:SUB_CONN
+              echo "this env sub conn $secret"
+              echo "this env sub conn length $secret.Length"
+              echo 'chars'
+              $secret.ToCharArray()
+              echo 'chars length'
+              $secret.ToCharArray().Length
+              $exposed=$($secret.ToCharArray() -join "")
+              echo $exposed
+              echo "GetSecret"
+              $out=(GetSecret($secret))
+              Set-Content test.txt $out
+              echo "ls"
+              ls
+              (Get-Content -Path test.txt -Raw)
+              ((Get-Content -Path test.txt -Raw) -replace "<-eliminate->", "") | Set-Content test.txt
+              Get-Content -Path test.txt
+        # - task: Bash@3
+        #   name: 'debugBash'
+        #   displayName: 'debug bash'
+        #   # env:
+        #   #   SUB_CONN: $(subscriptionConnection)                  
+        #   inputs:
+        #     targetType: 'inline'
+        #     script: |
+        #       echo "Count up to the value of the variable group's secret variable *contososecret*:"
+        #       for number in {1..$(SUB_CONN)}
+        #       do
+        #           echo "$number"
+        #       done
+        - task: AzureCLI@2
+          name: 'checkARMSub'
+          displayName: 'Check ARM Subscription'
+          # env:
+          #   subscriptionConnection: $(subscriptionConnection)                  
+          inputs:
+            # azureSubscription: $(checkTerraform.CT_VARS_SUB_CONN)
+            # azureSubscription: ${{ variables.SUB_CONN }}
+            # azureSubscription: $[variables.SUB_CONN]
+            azureSubscription: $(subConn) # works bec not secret var
+            # azureSubscription: ${{ variables.azSub }}
+            # azureSubscription: $(azSub)
+            # azureSubscription: $(subscriptionConnection)
+            # azureSubscription: '"$(subscriptionConnection)"'
+            # azureSubscription: '"$(azSub)"'
+            # azureSubscription: $(AZ_SUB)
+            scriptType: 'pscore'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              az account list
+              echo "rg name $(TF_STATE_RESOURCE_GROUP_NAME)"
+              echo "stor acc name $(TF_STATE_STORAGE_ACCOUNT_NAME)"
+              echo "state cont name $(TF_STATE_CONTAINER_NAME)"
+              echo "tf dir $(terraformDirectory)"
+            powerShellErrorActionPreference: 'silentlyContinue'
+            addSpnToEnvironment: true
+        # - task: AzureCLI@2
+        #   displayName: 'Terraform init'
+        #   # env:
+        #   #   subscriptionConnection: $(subscriptionConnection)                  
+        #   inputs:
+        #     azureSubscription: $(checkTerraform.SUBSCRIPTION_CONNECTION)
+        #     scriptType: pscore
+        #     scriptLocation: inlineScript
+        #     inlineScript: |
+        #       # Propagate pipeline Service Principal as Terraform variables
+        #       $env:ARM_CLIENT_ID       ??= $env:servicePrincipalId
+        #       $env:ARM_CLIENT_SECRET   ??= $env:servicePrincipalKey
+        #       $env:ARM_TENANT_ID       ??= $env:tenantId
+        #       # Propagate from Azure CLI context
+        #       $env:ARM_TENANT_ID       ??= $(az account show --query tenantId -o tsv)
+        #       $env:ARM_SUBSCRIPTION_ID ??= $(az account show --query id -o tsv)              
+        #       # Put Terraform commands after this line
+        #     addSpnToEnvironment: true
+        #     useGlobalConfig: true
+        #     failOnStandardError: true
+        #     powerShellIgnoreLASTEXITCODE: false
+        #     workingDirectory: '$(terraformDirectory)'
