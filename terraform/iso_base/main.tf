@@ -27,6 +27,8 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
 
   scsihw = "virtio-scsi-pci"
 
+  iso = "./hirsute-server-cloudimg-amd64.img"
+
   onboot = false
   agent  = 1
   # cpu     = "kvm64" # defaults to host
@@ -64,12 +66,12 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
   # cicustom = "user=local:snippets/user_data_vm-${count.index}.yml"
   /* Create the cloud-init drive on the "local-lvm" storage */
 
-  ssh_user        = "root"
-  ssh_private_key = <<EOF
------BEGIN RSA PRIVATE KEY-----
-private ssh key root
------END RSA PRIVATE KEY-----
-  EOF
+  #   ssh_user        = "root"
+  #   ssh_private_key = <<EOF
+  # -----BEGIN RSA PRIVATE KEY-----
+  # private ssh key root
+  # -----END RSA PRIVATE KEY-----
+  #   EOF
 
 
   #creates ssh connection to check when the CT is ready for ansible provisioning
