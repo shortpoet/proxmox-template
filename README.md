@@ -77,3 +77,9 @@ pvesh ls /nodes/proxmox/qemu
 pvesh ls /nodes/proxmox/qemu/9002/config
 ls /dev/mapper # VMs-vm--{vmId}--disk--{diskIdx|cloudinit}
 ```
+
+## Terraform
+
+```powershell
+git filter-branch --force --index-filter 'git rm -r --cached --ignore-unmatch terraform/iso_base/.terraform' --prune-empty -- --all
+```

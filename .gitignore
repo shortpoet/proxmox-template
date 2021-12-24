@@ -57,8 +57,9 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-**/*.img
-terraform/iso_base/hirsute-server-cloudimg-amd64.img
+*.img
+# **/**/*.img
+# terraform/iso_base/hirsute-server-cloudimg-amd64.img
 
 # terraform/iso_base/.terraform/providers/registry.terraform.io/telmate/proxmox/2.6.6/windows_amd64/terraform-provider-proxmox_v2.6.6.exe
 
