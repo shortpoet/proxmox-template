@@ -1,5 +1,5 @@
 locals {
-  vmid = var.vm_type == "template" ? 9003 : 100
+  vmid = var.vm_type == "template" ? 9005 : 100
 }
 
 
@@ -14,20 +14,20 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
   # clone       = "cloud-init-focal"
 
   # The destination resource pool for the new VM
-  pool = "pool0"
+  pool = "templates"
 
 
   cores    = 2
   sockets  = 1
-  vcpus    = 2
+  vcpus    = 1
   memory   = 2048
   balloon  = 2048
   boot     = "c"
-  bootdisk = "virtio0"
+  bootdisk = "scsi0"
 
   scsihw = "virtio-scsi-pci"
 
-  iso = "./hirsute-server-cloudimg-amd64.img"
+  iso = var.hosts[count.index].iso
 
   onboot = false
   agent  = 1
@@ -42,11 +42,16 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
     model  = "virtio"
   }
 
+  serial {
+    type = "socket"
+    id   = 0
+  }
+
   # disk_gb = 4
   # storage = var.storage_pool
   disk {
     #id = 0
-    type    = "virtio"
+    type    = "scsi"
     storage = var.storage_pool
     size    = var.rootfs_size
   }
@@ -54,7 +59,7 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
   os_type = "cloud-init"
   # this is a mistake in docs cloud init example
   # cloudinit_cdrom_storage = "local-lvm"
-  ipconfig0 = "dhcp"
+  # ipconfig0 = "dhcp"
   # ipconfig0 = "ip=${var.ips[count.index]}/24,gw=${cidrhost(format("%s/24", var.ips[count.index]), 1)}"
   # ipconfig0 = "ip=10.0.2.99/16,gw=10.0.2.2"
 
@@ -83,12 +88,12 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
   #   timeout     = "3m"
   # }
 
-  provisioner "remote-exec" {
-    inline = [
-      "echo 'Cool, we are ready for provisioning'",
-      "ip a"
-    ]
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "echo 'Cool, we are ready for provisioning'",
+  #     "ip a"
+  #   ]
+  # }
 
   # provisioner "remote-exec" {
   #   # Leave this here so we know when to start with Ansible local-exec 

@@ -1,0 +1,56 @@
+#cloud-config
+hostname: ubuntu2004
+manage_etc_hosts: true
+user: ansible
+password: ansible
+ssh_authorized_keys:
+  - ssh-rsa AAAAKEYHEEEEREEEE= user@client
+chpasswd:
+  expire: False
+# users:
+#   - default
+# package_upgrade: true
+# package_reboot_if_required: true
+# locale: en_GB.UTF-8
+# timezone: Europe/Berlin
+# runcmd:
+#   - sed -i 's/[#]*Port 22/Port 9726/g' /etc/ssh/sshd_config
+#   - sed -i 's/[#]*PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
+#   - sed -i 's/[#]*PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
+#   - sed -i 's/#HostKey \/etc\/ssh\/ssh_host_ed25519_key/HostKey \/etc\/ssh\/ssh_host_ed25519_key/g' /etc/ssh/sshd_config
+#   - systemctl reload ssh
+# packages:
+#   - qemu-guest-agent
+#   - docker.io# locale: en_US
+# # datasource_list: [ NoCloud, ConfigDrive ]
+# keyboard:
+#   layout: en
+#   variant: us
+# # storage:
+# #   layout:
+# #     name: lvm
+# identity:
+#   hostname: ubuntu2004
+#   username: ansible
+#   password: ansible
+#   # 'ubuntu', but hashed
+#   #password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
+#   # 'ansible', but hashed
+#   # password: "$6$FhcddHFVZ7ABA4Gi$LOtq1F3WwTmi9OsZxbJN.8p6cr7u3/5e.yOLG69Lrbw5cGMJ3vvDNbG0EW4OHYv0G4VJzodk0wyNwPYeArFUU."
+# ssh:
+#   install-server: true
+#   allow-pw: true
+# package-update: true
+# package-upgrade: true
+# user-data:
+#   disable_root: false
+# packages:
+#   - qemu-guest-agent
+# late-commands:
+#   - echo 'ansible ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ansible
+# # network:
+# #   renderers: ['netplan', 'eni', 'sysconfig']
+# #   ethernets:
+# #     eth0:
+# #       dhcp4: true
+# #   version: 2

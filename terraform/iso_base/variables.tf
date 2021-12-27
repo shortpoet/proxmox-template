@@ -20,6 +20,7 @@ variable "hosts" {
   type = list(object({
     hostname = string
     ip       = string
+    iso      = string
   }))
   default = []
 }

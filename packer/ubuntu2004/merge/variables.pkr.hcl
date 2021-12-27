@@ -1,6 +1,7 @@
 #############################################################
 # Proxmox variables
 #############################################################
+
 variable "proxmox_hostname" {
   description = "Proxmox host address (e.g. https://192.168.1.1:8006)"
   type = string
@@ -54,6 +55,7 @@ variable "iso_checksum" {
 variable "iso_file" {
   description = "Location of ISO file on the server. E.g. local:iso/<filename>.iso"
   type = string
+  default = ""
 }
 
 variable "pool" {
@@ -77,12 +79,6 @@ variable "vm_name" {
   type = string
 }
 
-variable "vm_storage_pool" {
-  description = "Storage where template will be stored"
-  type = string
-  default = "vmstore"
-}
-
 variable "vm_cores" {
   description = "VM amount of memory"
   type = number
@@ -101,12 +97,30 @@ variable "vm_sockets" {
   default = 1
 }
 
+variable "disk_storage_format" {
+  type    = string
+  default = "raw"
+  description = "The storage format used by the disk"
+}
+
+variable "disk_storage_pool" {
+  description = "Storage where template will be stored"
+  type = string
+  default = "vmstore"
+}
+
+variable "disk_storage_pool_type" {
+  type    = string
+  default = "lvm-thin"
+  description = "Storage pool type"
+}
+
 
 #############################################################
 # OS Settings
 #############################################################
-variable "username" {
-  description = "Default username"
+variable "ssh_username" {
+  description = "Default ssh username"
   type = string
   default = "notroot"
 }

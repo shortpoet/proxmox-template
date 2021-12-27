@@ -8,18 +8,18 @@ case "$template" in
     VM_ID="9000";
    ;;
    "2")
-    IMG_NAME="focal-server-cloudimg-amd64.img";
-    TEMPL_NAME="ubuntu2004-cloud-img";
+    IMG_NAME="";
+    TEMPL_NAME="";
     VM_ID="9001";
    ;;
    "3")
-    IMG_NAME="focal-server-cloudimg-amd64-disk-kvm.img";
-    TEMPL_NAME="ubuntu2004-cloud-img-kvm";
+    IMG_NAME="focal-server-cloudimg-amd64.img";
+    TEMPL_NAME="ubuntu2004-cloud-img";
     VM_ID="9002";
    ;;
    "4")
-    IMG_NAME="focal-server-cloudimg-amd64.qcow2";
-    TEMPL_NAME="ubuntu2004-cloud-img-qcow";
+    IMG_NAME="hirsute-server-cloudimg-amd64.img";
+    TEMPL_NAME="ubuntu2104-cloud-template";
     VM_ID="9003";
    ;;
 esac
@@ -53,13 +53,13 @@ case "$template" in
     qm importdisk $VM_ID $IMG_NAME $STORAGE_POOL --format qcow2
    ;;
    "2")
-    qm importdisk $VM_ID $IMG_NAME $STORAGE_POOL --format qcow2
-   ;;
-   "3")
     qm importdisk $VM_ID $IMG_NAME $STORAGE_POOL
    ;;
-   "4")
+   "3")
     qm importdisk $VM_ID $IMG_NAME $STORAGE_POOL --format qcow2
+   ;;
+   "4")
+    qm importdisk $VM_ID $IMG_NAME $STORAGE_POOL
    ;;
 esac
 
@@ -110,15 +110,15 @@ case "$template" in
    ;;
    "2")
     VM_CLONE_ID="997"
-    CLONE_NAME="2004clone-cloud-init"
+    CLONE_NAME=""
    ;;
    "3")
     VM_CLONE_ID="998"
-    CLONE_NAME="2004clone-cloud-init-kvm-qcow"
+    CLONE_NAME="2004clone-cloud-init"
    ;;
    "4")
     VM_CLONE_ID="999"
-    CLONE_NAME="2004clone-cloud-init-qcow"
+    CLONE_NAME="2104clone-cloud-00"
    ;;
 esac
 
@@ -127,7 +127,7 @@ qm clone $VM_ID $VM_CLONE_ID --name $CLONE_NAME
   # Next, set the SSH keys and IP address:
 qm set $VM_CLONE_ID  --sshkey ~/.ssh/id_ed25519_proxmox.pub
 # qm set $VM_ID  --ipconfig0 ip=dhcp
-qm set $VM_CLONE_ID  --ipconfig0 ip=192.168.1.99/24,gw=192.168.1.1
+qm set $VM_CLONE_ID  --ipconfig0 ip=192.168.1.111/24,gw=192.168.1.1
 
 # Resize the primary boot disk (otherwise it will be around 2G by default)
 # This step adds another 8G of disk space, but change this as you need to
@@ -144,7 +144,7 @@ qm start $VM_CLONE_ID
 
 # ssh into vm
 
-ssh ubuntu@192.168.1.99
+ssh ubuntu@192.168.1.111
 
 # cleanup
 sudo qm stop 999 && sudo qm destroy 999

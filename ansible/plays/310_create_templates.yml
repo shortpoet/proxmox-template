@@ -5,14 +5,18 @@
     pve_node: proxmox
     pve_apiuser: automation@pve
     pve_apipass: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
-    get_vms: false
-    get_containers: true
-    vms:
-      - ubuntu:
-          - name: ubuntu-2104
-            url: https://cloud-images.ubuntu.com/hirsute/current/hirsute-server-cloudimg-amd64.img
-      #     - name: ubuntu-2004
-      #       url: https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
+    template_name: ubuntu2004-cloud-ansible
+    storage_pool: vmstore
+    distros:
+      - name: ubuntu
+        releases:
+          # - name: ubuntu-2104
+          #   url: https://cloud-images.ubuntu.com/hirsute/current/hirsute-server-cloudimg-amd64.img
+          - name: ubuntu-2004
+            url: https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
+            image: focal-server-cloudimg-amd64.img
+            vmid: 9004
+            template_name: "ubuntu2004-cloud-template-ansible"
       #     - name: ubuntu-1804
       #       url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
       # - debian:

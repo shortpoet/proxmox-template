@@ -13,6 +13,18 @@
 
 - [Get images](https://docs.openstack.org/image-guide/obtain-images.html)
 
+### Push Images
+
+```bash
+ssh proxmox 'wget "http://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.qcow2" -P /var/lib/vz/template/iso/'
+ssh proxmox 'wget "https://releases.ubuntu.com/20.04/ubuntu-20.04.3-live-server-amd64.iso" -P /var/lib/vz/template/iso/'
+ssh proxmox 'wget "https://cdimage.debian.org/cdimage/release/current/amd64/iso-cd/debian-11.2.0-amd64-netinst.iso" -P /var/lib/vz/template/iso/'
+ssh proxmox 'wget "http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04.3-live-server-arm64.iso" -P /var/lib/vz/template/iso/'
+# or
+scp "C:/Users/shortpoet/Downloads/ubuntu-20.04.3-live-server-arm64.iso" proxmox:/var/lib/vz/template/iso/
+scp .\hirsute-server-cloudimg-amd64.img proxmox:/var/lib/vz/template/iso/
+```
+
 ### Ubuntu
 
 - get most recent release url
@@ -30,6 +42,7 @@ sstream-query --json --keyring=/usr/share/keyrings/ubuntu-cloudimage-keyring.gpg
 ```
 
 - [Index of /releases/streams/v1](https://cloud-images.ubuntu.com/releases/streams/v1/)
+- [Ubuntu 20.04.3 LTS (Focal Fossa)](https://releases.ubuntu.com/20.04/)
 - [Ubuntu 20.04 LTS (Focal Fossa) Daily Build [20211216]](https://cloud-images.ubuntu.com/focal/current/)
   - [img dl](https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img)
 - [Ubuntu 20.04 LTS (Focal Fossa) [20211129]](https://cloud-images.ubuntu.com/releases/focal/release-20211129/)
@@ -78,8 +91,25 @@ pvesh ls /nodes/proxmox/qemu/9002/config
 ls /dev/mapper # VMs-vm--{vmId}--disk--{diskIdx|cloudinit}
 ```
 
-## Terraform
+- force kill vm
+
+```bash
+VMID='9004'
+ps aux | grep "/usr/bin/kvm -id $VMID" # get PID
+kill -9 PID
+```
+
+## Environment
 
 ```powershell
-git filter-branch --force --index-filter 'git rm -r --cached --ignore-unmatch terraform/iso_base/.terraform' --prune-empty -- --all
+$env:TF_VAR_proxmox_password=$(Get-Secret -Name ProxmoxAutomation -AsPlainText)
+$env:PKR_VAR_proxmox_password=$(Get-Secret -Name ProxmoxAutomation -AsPlainText)
+```
+
+## git (image files 😅)
+
+- [git rm - fatal: pathspec did not match any files](https://stackoverflow.com/questions/25458306/git-rm-fatal-pathspec-did-not-match-any-files)
+
+```bash
+git filter-branch --force --index-filter 'git rm -r --cached --ignore-unmatch terraform/iso_base/hirsute-server-cloudimg-amd64.img' --prune-empty -- --all
 ```

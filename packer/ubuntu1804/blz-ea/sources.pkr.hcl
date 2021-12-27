@@ -23,14 +23,14 @@ source "proxmox" "template" {
 
   disks {
     type              = "scsi"
-    disk_size         = "30G"
+    disk_size         = "2G"
     storage_pool      = var.vm_storage_pool
     storage_pool_type = "lvm-thin"
     format            = "raw"
   }
 
   ssh_username          = var.username
-  ssh_password          = var.user_password
+  ssh_password          = var.proxmox_password
   ssh_timeout           = "35m"
 
   iso_file              = var.iso_file
@@ -58,11 +58,37 @@ source "proxmox" "template" {
     " time_zone=${var.time_zone}",
     " passwd/username=${var.username}",
     " passwd/user-fullname=${var.username}",
-    " passwd/user-password=${var.user_password}",
-    " passwd/user-password-again=${var.user_password}",
+    " passwd/user-password=${var.proxmox_password}",
+    " passwd/user-password-again=${var.proxmox_password}",
     " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg",
-    " <enter>"
+    "-- <enter>"
   ]
+
+  # boot_command = [
+  #   "<esc><wait>",
+  #   "<esc><wait>",
+  #   "<enter><wait>",
+  #   "/install/vmlinuz ",
+  #   "auto ",
+  #   "console-setup/ask_detect=false ",
+  #   "debconf/frontend=noninteractive ",
+  #   " hostname=${var.vm_name}",
+  #   "fb=false ",
+  #   "grub-installer/bootdev=/dev/sda<wait> ",
+  #   "initrd=/install/initrd.gz ",
+  #   "kbd-chooser/method=us ",
+  #   "keyboard-configuration/modelcode=SKIP ",
+  #   " username=${var.username}",
+  #   " time_zone=${var.time_zone}",
+  #   "noapic ",
+  #   " passwd/username=${var.username}",
+  #   " passwd/user-fullname=${var.username}",
+  #   " passwd/user-password=${var.proxmox_password}",
+  #   " passwd/user-password-again=${var.proxmox_password}",
+  #   " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg",
+  #   "-- <enter>"
+  # ]
+
 }
 
 build {

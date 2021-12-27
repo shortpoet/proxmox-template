@@ -1,29 +1,92 @@
 ---
-- name: Create virtual machines
-  proxmox_kvm:
-    api_user: "{{ proxmox.api_user }}"
-    api_password: "{{ proxmox.api_password }}"
-    api_host: "{{ proxmox.api_host }}"
-    node: "{{ item.value.node }}"
-    name: "{{ item.key }}"
-    net: "{{ item.value.net | default(proxmox_vms_defaults.net) }}"
-    scsihw: "{{ item.value.scsihw | default(proxmox_vms_defaults.scsihw) }}"
-    virtio: "{{ item.value.virtio | default(proxmox_vms_defaults.virtio) }}"
-    cores: "{{ item.value.cores | default(proxmox_vms_defaults.cores) }}"
-    memory: "{{ item.value.memory_size | default(proxmox_vms_defaults.memory_size) }}"
-    balloon: "{{ item.value.balloon | default(proxmox_vms_defaults.balloon) }}"
-    vga: "qxl"
-    ostype: "{{ item.value.ostype | default(proxmox_vms_defaults.ostype) }}"
-    # Look for deploy-args-file of the vm and remove all newlines. If not found take the
-    # template-file and remove all newlines (all commands in one line). See ansible filter documentation.
-    args: "{{ lookup('template', 'deploy-args-'~distributions[item.key]~'.j2'
-      if deploy_file_exists_list[item.key] else proxmox_vms_defaults.deploy_args_template) |
-      replace('\n', '') }}"
-    cpu: "{{ item.value.cpu | default(proxmox_vms_defaults.cpu) }}"
-    onboot: "{{ item.value.onboot | default(proxmox_vms_defaults.onboot) }}"
-    state: present
-  with_dict: "{{ vms }}"
-  loop_control:
-    pause: 10
-  notify: sleep
+- name: Download cloud image
+  get_url:
+    url: "{{ item.1.url }}"
+    dest: /var/lib/vz/template/iso/{{ item.1.image }}
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+
+- name: Synchronize user data file to snippets on proxmox node
+  ansible.posix.synchronize:
+    src: "../configs/{{ item.1.name }}-user_data.yml"
+    dest: "/var/lib/vz/snippets/{{ item.1.name }}-user_data.yml"
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+
+- name: Create empty VM using Cloud-Init
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_apiuser }}"
+    # api_password: "{{ lookup('passwordstore', 'Homelab/proxmox/users/automation@pve') }}"
+    api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
+    api_host: proxmox
+    name: "{{ item.1.template_name }}"
+    vmid: "{{ item.1.vmid }}"
+    scsihw: virtio-scsi-pci
+    scsi:
+      scsi0: "{{ storage_pool }}:vm-{{ item.1.vmid }}-disk-0,format=raw"
+    ide:
+      ide2: "{{ storage_pool }}:cloudinit"
+    bootdisk: scsi0
+    cicustom: "user=local:snippets/{{ item.1.name }}-user_data.yml"
+    # ciuser: user
+    # cipassword: hallowelt
+    net:
+      net0: "virtio,bridge=vmbr0"
+    ipconfig:
+      ipconfig0: "ip=dhcp"
+      # ipconfig0: "ip=192.168.1.200/24"
+    proxmox_default_behavior: compatibility
+    template: true
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  # loop_control:
+  #   pause: 10
+  # notify: sleep
   register: created_vms_pve
+
+# - debug:
+#     var: created_vms_pve.results
+# - debug:
+#     var: created_vms_pve.results.item
+- name: import init disk
+  ansible.builtin.command:
+    cmd: "qm importdisk {{ item.1.vmid }} /var/lib/vz/template/iso/{{ item.1.image }} {{ storage_pool }}"
+    creates: "/dev/mapper/VMs-vm--{{ item.1.vmid }}--disk--0"
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  # loop_control:
+  #   pause: 10
+# https://github.com/inoxio/ansible-role-proxmox-vms/blob/master/tasks/main.yml
+# - name: Create virtual machines
+#   proxmox_kvm:
+#     api_user: "{{ proxmox.api_user }}"
+#     api_password: "{{ proxmox.api_password }}"
+#     api_host: "{{ proxmox.api_host }}"
+#     node: "{{ item.value.node }}"
+#     name: "{{ item.key }}"
+#     net: "{{ item.value.net | default(proxmox_vms_defaults.net) }}"
+#     scsihw: "{{ item.value.scsihw | default(proxmox_vms_defaults.scsihw) }}"
+#     virtio: "{{ item.value.virtio | default(proxmox_vms_defaults.virtio) }}"
+#     cores: "{{ item.value.cores | default(proxmox_vms_defaults.cores) }}"
+#     memory: "{{ item.value.memory_size | default(proxmox_vms_defaults.memory_size) }}"
+#     balloon: "{{ item.value.balloon | default(proxmox_vms_defaults.balloon) }}"
+#     vga: "qxl"
+#     ostype: "{{ item.value.ostype | default(proxmox_vms_defaults.ostype) }}"
+#     # Look for deploy-args-file of the vm and remove all newlines. If not found take the
+#     # template-file and remove all newlines (all commands in one line). See ansible filter documentation.
+#     args: "{{ lookup('template', 'deploy-args-'~distributions[item.key]~'.j2'
+#       if deploy_file_exists_list[item.key] else proxmox_vms_defaults.deploy_args_template) |
+#       replace('\n', '') }}"
+#     cpu: "{{ item.value.cpu | default(proxmox_vms_defaults.cpu) }}"
+#     onboot: "{{ item.value.onboot | default(proxmox_vms_defaults.onboot) }}"
+#     state: present
+#   with_dict: "{{ vms }}"
+#   loop_control:
+#     pause: 10
+#   notify: sleep
+#   register: created_vms_pve

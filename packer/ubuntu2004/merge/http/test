@@ -1,0 +1,108 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US
+  datasource_list: [ NoCloud, ConfigDrive ]
+  keyboard:
+    layout: en
+    variant: us
+  storage:
+    layout:
+      name: lvm
+  identity:
+    hostname: ubuntu2004
+    username: ubuntu
+    password: root
+  ssh:
+    allow-pw: true
+    install-server: true
+  user-data:
+    disable_root: false
+  packages:
+    - qemu-guest-agent
+  late-commands:
+    - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
+  network:
+    renderers: ['netplan', 'eni', 'sysconfig']
+    ethernets:
+      eth0: 
+        dhcp4: true
+    version: 2
+
+#cloud-config
+autoinstall:
+  version: 1
+  identity:
+    hostname: tpl-ubuntu-2004
+    username: ansible
+    # 'ubuntu', but hashed
+    #password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
+    # 'ansible', but hashed
+    password: "$6$FhcddHFVZ7ABA4Gi$LOtq1F3WwTmi9OsZxbJN.8p6cr7u3/5e.yOLG69Lrbw5cGMJ3vvDNbG0EW4OHYv0G4VJzodk0wyNwPYeArFUU."
+  ssh:
+    install-server: true
+    allow-pw: true
+  package-update: true
+  package-upgrade: true
+  packages:
+    - qemu-guest-agent
+  late-commands:
+    - echo 'ansible ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ansible
+
+
+#cloud-config
+autoinstall:
+  version: 1
+
+  locale: en_US
+  keyboard:
+    layout: en
+    variant: us
+  storage:
+    layout:
+      name: lvm
+
+  # storage:
+  #   layout:
+  #     name: direct
+  #   config:
+  #     - type: disk
+  #       id: disk0
+  #       match:
+  #         size: largest
+  #     - type: partition
+  #       id: boot-partition
+  #       device: disk0
+  #       size: 500M
+  #     - type: partition
+  #       id: root-partition
+  #       device: disk0
+  #       size: -1
+
+  identity:
+    hostname: ubuntu2004
+    username: ubuntu
+    password: root
+    # password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
+  ssh:
+    # allow-pw: true
+    install-server: true
+  user-data:
+    disable_root: false
+  apt:
+    geoip: true
+    preserve_sources_list: false
+    primary:
+      - arches: [amd64, i386]
+        uri: http://gb.archive.ubuntu.com/ubuntu
+      - arches: [default]
+        uri: http://ports.ubuntu.com/ubuntu-ports
+  packages:
+    - qemu-guest-agent
+  late-commands:
+    # - 'sed -i "s/dhcp4: true/&\n      dhcp-identifier: mac/" /target/etc/netplan/00-installer-config.yaml'
+    - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
+  
+    # - "echo 'Defaults:vagrant !requiretty' > /target/etc/sudoers.d/vagrant"
+    # - "echo 'vagrant ALL=(ALL) NOPASSWD: ALL' >> /target/etc/sudoers.d/vagrant"
+    # - "chmod 440 /target/etc/sudoers.d/vagrant"
