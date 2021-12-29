@@ -1,0 +1,83 @@
+#cloud-config
+autoinstall:
+  version: 1
+  datasource_list: [ NoCloud, ConfigDrive ]
+  keyboard:
+    layout: en
+    variant: us
+  # storage:
+  #   layout:
+  #     name: lvm
+  identity:
+    hostname: ubuntu-server-2004
+    # generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
+    password: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1" 
+    username: notroot
+  early-commands:
+    # Block inbound SSH to stop Packer trying to connect during initial install
+    # - iptables -A INPUT -p tcp --dport 22 -j DROP
+    - sudo systemctl stop ssh
+  late-commands:
+    - sed -i 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD:ALL/g' /etc/sudoers
+    - sed -i 's/^#*\(send dhcp-client-identifier\).*$/\1 = hardware;/' /target/etc/dhcp/dhclient.conf
+    - "echo 'Defaults:notroot !requiretty' > /target/etc/sudoers.d/notroot"
+    - "echo 'notroot ALL=(ALL) NOPASSWD: ALL' >> /target/etc/sudoers.d/notroot"
+    - "chmod 440 /target/etc/sudoers.d/notroot"
+    - 'sed -i "s/dhcp4: true/&\n      dhcp-identifier: mac/" /target/etc/netplan/00-installer-config.yaml'
+  # network:
+  #   network:
+  #     version: 2
+  #     ethernets:
+  #       enp*:
+  #         dhcp4: true
+  #       eth*:
+  #         dhcp4: true
+  packages:
+    - curl
+    - wget
+    - lsb-release
+    - openssh-server
+    - ntp # network time protocol
+    # - bc #  bc - An arbitrary precision calculator language
+    # - open-vm-tools
+    # - qemu-guest-agent 
+  ssh:
+    # For now we install openssh-server during package installs
+    allow-pw: true
+    install-server: false
+  # storage:
+  #   layout:
+  #     name: direct
+  #   config:
+  #     - type: disk
+  #       id: disk0
+  #       match:
+  #         size: largest
+  #     - type: partition
+  #       id: boot-partition
+  #       device: disk0
+  #       size: 1024M
+  #     - type: partition
+  #       id: root-partition
+  #       device: disk0
+  #       size: -1
+
+# #cloud-config
+# autoinstall:
+#   version: 1
+#   identity:
+#     hostname: tpl-ubuntu-2004
+#     username: ansible
+#     # 'ubuntu', but hashed
+#     #password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
+#     # 'ansible', but hashed
+#     password: "$6$FhcddHFVZ7ABA4Gi$LOtq1F3WwTmi9OsZxbJN.8p6cr7u3/5e.yOLG69Lrbw5cGMJ3vvDNbG0EW4OHYv0G4VJzodk0wyNwPYeArFUU."
+#   ssh:
+#     install-server: true
+#     allow-pw: true
+#   package-update: true
+#   package-upgrade: true
+#   packages:
+#     - qemu-guest-agent
+#   late-commands:
+#     - echo 'ansible ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ansible

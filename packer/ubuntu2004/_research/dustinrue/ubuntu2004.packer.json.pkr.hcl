@@ -101,4 +101,8 @@ build {
     only   = ["proxmox"]
   }
 
+  post-processor "manifest" {
+    output     = "${path.root}/packer-manifest.json"
+    strip_path = true
+  }
 }

@@ -69,5 +69,12 @@
         "proxmox"
       ]
     }
+  ],
+  "post-processors": [
+    {
+      "output": "{{ template_dir }}/packer-manifest.json",
+      "strip_path": true,
+      "type": "manifest"
+    }
   ]
 }
