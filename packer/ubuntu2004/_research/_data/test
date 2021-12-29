@@ -38,6 +38,10 @@ autoinstall:
     - sed -i 's/^#*\(send dhcp-client-identifier\).*$/\1 = hardware;/' /target/etc/dhcp/dhclient.conf
     - 'sed -i "s/dhcp4: true/&\n      dhcp-identifier: mac/" /target/etc/netplan/00-installer-config.yaml'    
     # https://github.com/dbond007/Packer/blob/master/ubuntu_base/etc/http/user-data
+
+    # https://tekanaid.com/posts/hashicorp-packer-build-ubuntu20-04-vmware
+    - curtin in-target --target=/target -- chmod 440 /etc/sudoers.d/ubuntu
+  # packages: [open-vm-tools, openssh-server, net-tools, perl, open-iscsi, ntp, curl, vim, ifupdown, zip, unzip, gnupg2, software-properties-common, apt-transport-https, ca-certificates, lsb-release, python3-pip, jq]
   packages:
     - curl
     - wget

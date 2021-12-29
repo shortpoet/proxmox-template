@@ -3,55 +3,75 @@ manage_etc_hosts: true
 hostname: ubuntu-server-2004
 username: notroot
 # generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
-password: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1"
+password: ubuntu
+# password: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1"
 ssh_authorized_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
 chpasswd:
   expire: False
-# users:
-#   - default
-# package_upgrade: true
-# package_reboot_if_required: true
-# locale: en_GB.UTF-8
-# timezone: Europe/Berlin
-# runcmd:
-#   - sed -i 's/[#]*Port 22/Port 9726/g' /etc/ssh/sshd_config
-#   - sed -i 's/[#]*PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
-#   - sed -i 's/[#]*PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
-#   - sed -i 's/#HostKey \/etc\/ssh\/ssh_host_ed25519_key/HostKey \/etc\/ssh\/ssh_host_ed25519_key/g' /etc/ssh/sshd_config
-#   - systemctl reload ssh
-# packages:
-#   - qemu-guest-agent
-#   - docker.io# locale: en_US
-# # datasource_list: [ NoCloud, ConfigDrive ]
+# #cloud-config
+# # datasource_list: [NoCloud, ConfigDrive]
+# locale: en_US
 # keyboard:
 #   layout: en
 #   variant: us
-# # storage:
-# #   layout:
-# #     name: lvm
-# identity:
-#   hostname: ubuntu2004
-#   username: ansible
-#   password: ansible
-#   # 'ubuntu', but hashed
-#   #password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
-#   # 'ansible', but hashed
-#   # password: "$6$FhcddHFVZ7ABA4Gi$LOtq1F3WwTmi9OsZxbJN.8p6cr7u3/5e.yOLG69Lrbw5cGMJ3vvDNbG0EW4OHYv0G4VJzodk0wyNwPYeArFUU."
-# ssh:
-#   install-server: true
-#   allow-pw: true
-# package_update: true
-# package_upgrade: true
+# manage_etc_hosts: true
+# hostname: ubuntu-server-2004
+# username: notroot
+# # generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
+# password: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1"
 # user-data:
 #   disable_root: false
+# chpasswd:
+#   expire: False
+# ssh:
+#   # For now we install openssh-server during package installs
+#   install-server: false
+#   allow-pw: true
+# ssh_authorized_keys:
+#   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
+# package_update: true
+# package_upgrade: true
 # packages:
-#   - qemu-guest-agent
-# late-commands:
-#   - echo 'ansible ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ansible
-# # network:
-# #   renderers: ['netplan', 'eni', 'sysconfig']
-# #   ethernets:
-# #     eth0:
-# #       dhcp4: true
-# #   version: 2
+#   - curl
+#   - wget
+#   - lsb-release
+#   - openssh-server
+#   - ntp # network time protocol
+#   # - bc #  bc - An arbitrary precision calculator language
+#   # - open-vm-tools
+#   # - qemu-guest-agent
+# # users:
+# #   - default
+# # package_upgrade: true
+# # package_reboot_if_required: true
+# # locale: en_GB.UTF-8
+# # timezone: Europe/Berlin
+# # runcmd:
+# #   - sed -i 's/[#]*Port 22/Port 9726/g' /etc/ssh/sshd_config
+# #   - sed -i 's/[#]*PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
+# #   - sed -i 's/[#]*PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
+# #   - sed -i 's/#HostKey \/etc\/ssh\/ssh_host_ed25519_key/HostKey \/etc\/ssh\/ssh_host_ed25519_key/g' /etc/ssh/sshd_config
+# #   - systemctl reload ssh
+# # packages:
+# #   - qemu-guest-agent
+# #   - docker.io# locale: en_US
+# # # storage:
+# # #   layout:
+# # #     name: lvm
+# # identity:
+# #   hostname: ubuntu2004
+# #   username: ansible
+# #   password: ansible
+# #   # 'ubuntu', but hashed
+# #   #password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
+# #   # 'ansible', but hashed
+# #   # password: "$6$FhcddHFVZ7ABA4Gi$LOtq1F3WwTmi9OsZxbJN.8p6cr7u3/5e.yOLG69Lrbw5cGMJ3vvDNbG0EW4OHYv0G4VJzodk0wyNwPYeArFUU."
+# # late-commands:
+# #   - echo 'ansible ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ansible
+# # # network:
+# # #   renderers: ['netplan', 'eni', 'sysconfig']
+# # #   ethernets:
+# # #     eth0:
+# # #       dhcp4: true
+# # #   version: 2
