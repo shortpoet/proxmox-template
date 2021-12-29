@@ -15,7 +15,7 @@
           - name: ubuntu-2004
             url: https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
             image: focal-server-cloudimg-amd64.img
-            vmid: 9004
+            vmid: 9999
             template_name: "ubuntu2004-cloud-template-ansible"
       #     - name: ubuntu-1804
       #       url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img

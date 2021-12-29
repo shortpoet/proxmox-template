@@ -1,10 +1,11 @@
 #cloud-config
-hostname: ubuntu2004
 manage_etc_hosts: true
-user: ansible
-password: ansible
+hostname: ubuntu-server-2004
+username: notroot
+# generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
+password: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1"
 ssh_authorized_keys:
-  - ssh-rsa AAAAKEYHEEEEREEEE= user@client
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
 chpasswd:
   expire: False
 # users:
@@ -40,8 +41,8 @@ chpasswd:
 # ssh:
 #   install-server: true
 #   allow-pw: true
-# package-update: true
-# package-upgrade: true
+# package_update: true
+# package_upgrade: true
 # user-data:
 #   disable_root: false
 # packages:

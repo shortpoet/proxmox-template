@@ -34,6 +34,15 @@ variable "proxmox_insecure_skip_tls_verify" {
 #############################################################
 # Template variables
 #############################################################
+variable "WIN_IP_LOCAL" {
+  description = <<-EOT
+    $env:PKR_VAR_WIN_IP_LOCAL=$((Get-NetIPConfiguration | Select-Object IPv4Address -First 1).IPv4Address.IPAddress)
+    or
+    export WIN_IP_LOCAL=$(pwsh.exe -c '$ip=$(Get-NetIPConfiguration | Select-Object IPv4Address -First 1);$ip.IPv4Address.IPAddress')
+  EOT
+  type = string
+}
+
 variable "iso_url" {
   description = "ISO image download link"
   type = string

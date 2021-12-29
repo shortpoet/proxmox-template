@@ -104,6 +104,7 @@ kill -9 PID
 ```powershell
 $env:TF_VAR_proxmox_password=$(Get-Secret -Name ProxmoxAutomation -AsPlainText)
 $env:PKR_VAR_proxmox_password=$(Get-Secret -Name ProxmoxAutomation -AsPlainText)
+$env:PKR_VAR_WIN_IP_LOCAL=$((Get-NetIPConfiguration | Select-Object IPv4Address -First 1).IPv4Address.IPAddress)
 ```
 
 ```bash

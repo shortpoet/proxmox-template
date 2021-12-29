@@ -1,3 +1,15 @@
+locals {
+  boot_command = [
+    "<wait><enter><esc><wait5><f6><esc><wait>",
+    "<bs><bs><bs><bs><bs>",
+    "<bs><bs><bs><bs><bs>",
+    "/casper/vmlinuz ",
+    "initrd=/casper/initrd ",
+    "ip=dhcp ",
+    "autoinstall ds=nocloud-net;s=http://${var.WIN_IP_LOCAL}:{{ .HTTPPort }}/ ",
+    "--- <enter>"
+  ]
+}
 source "proxmox" "template" {
   proxmox_url               = "${var.proxmox_hostname}/api2/json"
   insecure_skip_tls_verify 	= var.proxmox_insecure_skip_tls_verify
@@ -48,17 +60,7 @@ source "proxmox" "template" {
 
   http_directory        = "http"
   boot_wait             = "3s"
-  boot_command          = [
-    "<wait><enter><esc><wait5><f6><esc><wait>",
-    "<bs><bs><bs><bs><bs>",
-    "<bs><bs><bs><bs><bs>",
-    "/casper/vmlinuz ",
-    "initrd=/casper/initrd ",
-    "ip=dhcp ",
-    "autoinstall ds=nocloud-net;s=http://{{env `WIN_IP_LOCAL`}}:{{ .HTTPPort }}/ ",
-    "--- <enter>"
-  ]
-
+  boot_command          = local.boot_command
 }
 
 build {
