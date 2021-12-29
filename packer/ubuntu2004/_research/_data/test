@@ -1,0 +1,118 @@
+#cloud-config
+autoinstall:
+  version: 1
+  datasource_list: [ NoCloud, ConfigDrive ]
+  locale: en_US
+  keyboard:
+    layout: en
+    variant: us
+  identity:
+    hostname: ubuntu-server-2004
+    username: notroot
+    # generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
+    password: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1" 
+  user-data:
+    disable_root: false
+  ssh:
+    # For now we install openssh-server during package installs
+    install-server: false
+    allow-pw: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
+  early-commands:
+    # Block inbound SSH to stop Packer trying to connect during initial install
+    # - iptables -A INPUT -p tcp --dport 22 -j DROP
+    - sudo systemctl stop ssh
+  late-commands:
+    # https://github.com/mrlesmithjr/packer-templates/blob/master/http/ubuntu/user-data
+    - sed -i 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD:ALL/g' /etc/sudoers
+    - sed -i 's/^#*\(send dhcp-client-identifier\).*$/\1 = hardware;/' /target/etc/dhcp/dhclient.conf
+    - "echo 'Defaults:notroot !requiretty' > /target/etc/sudoers.d/notroot"
+    - "echo 'notroot ALL=(ALL) NOPASSWD: ALL' >> /target/etc/sudoers.d/notroot"
+    - "chmod 440 /target/etc/sudoers.d/notroot"
+    - 'sed -i "s/dhcp4: true/&\n      dhcp-identifier: mac/" /target/etc/netplan/00-installer-config.yaml'
+
+    - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
+  
+    # https://nickcharlton.net/posts/automating-ubuntu-2004-installs-with-packer.html
+    - sed -i 's/^#*\(send dhcp-client-identifier\).*$/\1 = hardware;/' /target/etc/dhcp/dhclient.conf
+    - 'sed -i "s/dhcp4: true/&\n      dhcp-identifier: mac/" /target/etc/netplan/00-installer-config.yaml'    
+    # https://github.com/dbond007/Packer/blob/master/ubuntu_base/etc/http/user-data
+  packages:
+    - curl
+    - wget
+    - lsb-release
+    - openssh-server
+    - ntp # network time protocol
+    # - bc #  bc - An arbitrary precision calculator language
+    # - open-vm-tools
+    # - qemu-guest-agent   
+  # apt:
+  #   geoip: true
+  #   preserve_sources_list: false
+  #   primary:
+  #     - arches: [amd64, i386]
+  #       uri: http://gb.archive.ubuntu.com/ubuntu
+  #     - arches: [default]
+  #       uri: http://ports.ubuntu.com/ubuntu-ports
+  storage:
+    layout:
+      name: lvm
+  #   layout:
+  #     name: direct
+  #   config:
+  #     - type: disk
+  #       id: disk0
+  #       match:
+  #         size: largest
+  #     - type: partition
+  #       id: boot-partition
+  #       device: disk0
+  #       size: 500M
+  #     - type: partition
+  #       id: root-partition
+  #       device: disk0
+  #       size: -1
+  #   layout:
+  #     name: direct
+  #   config:
+  #     - type: disk
+  #       id: disk0
+  #       match:
+  #         size: largest
+  #     - type: partition
+  #       id: boot-partition
+  #       device: disk0
+  #       size: 1024M
+  #     - type: partition
+  #       id: root-partition
+  #       device: disk0
+  #       size: -1
+  network:
+    version: 2
+    renderers: ['netplan', 'eni', 'sysconfig']
+    ethernets:
+      eth0: 
+        dhcp4: true
+      enp*:
+        dhcp4: true
+      eth*:
+        dhcp4: true
+      ens160:
+        addresses:
+          - 10.0.249.75/24
+        gateway4: 10.0.249.1
+        nameservers:
+          addresses:
+          - 10.10.10.10
+          - 10.10.10.11
+          - 10.10.10.12
+          - 10.10.10.13
+        search:
+          - domain.local
+      enp0s3:
+        dhcp4: true
+        optional: true
+      enp0s8:
+        dhcp4: true
+        optional: true
