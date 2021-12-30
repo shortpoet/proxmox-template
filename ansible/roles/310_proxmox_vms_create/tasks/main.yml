@@ -15,13 +15,14 @@
     - "{{ distros }}"
     - releases
 
-- name: Create empty VM using Cloud-Init
+- name: Create VM template using Cloud-Init
   community.general.proxmox_kvm:
     node: "{{ pve_node }}"
     api_user: "{{ pve_apiuser }}"
     # api_password: "{{ lookup('passwordstore', 'Homelab/proxmox/users/automation@pve') }}"
     api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
     api_host: proxmox
+    template: true
     name: "{{ item.1.template_name }}"
     vmid: "{{ item.1.vmid }}"
     scsihw: virtio-scsi-pci
@@ -39,7 +40,6 @@
       ipconfig0: "ip=dhcp"
       # ipconfig0: "ip=192.168.1.200/24"
     proxmox_default_behavior: compatibility
-    template: true
   with_subelements:
     - "{{ distros }}"
     - releases
@@ -59,8 +59,58 @@
   with_subelements:
     - "{{ distros }}"
     - releases
+
+- name: Create VM clone using Cloud-Init
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_apiuser }}"
+    api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
+    api_host: proxmox
+    template: false
+    name: "{{ item.1.template_name }}-clone"
+    clone: "{{ item.1.template_name }}"
+    vmid: "9999"
+    newid: "999"
+    scsihw: virtio-scsi-pci
+    scsi:
+      scsi0: "{{ storage_pool }}:vm-999-disk-0,format=raw"
+    ide:
+      ide2: "{{ storage_pool }}:cloudinit"
+    bootdisk: scsi0
+    cicustom: "user=local:snippets/{{ item.1.name }}-user_data.yml"
+    # ciuser: user
+    # cipassword: hallowelt
+    net:
+      net0: "virtio,bridge=vmbr0"
+    ipconfig:
+      # TODO set ip range based on cluster size and avail ips
+      ipconfig0: "ip=192.168.1.200/24"
+    proxmox_default_behavior: compatibility
+  with_subelements:
+    - "{{ distros }}"
+    - releases
   # loop_control:
   #   pause: 10
+  # notify: sleep
+  register: created_vms_pve
+  when: item.1.make_clone == true
+
+- name: Start Clone VM
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_apiuser }}"
+    api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
+    api_host: proxmox
+    name: "{{ item.1.template_name }}-clone"
+    state: started
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  # loop_control:
+  #   pause: 10
+  # notify: sleep
+  register: created_vms_pve
+  when: item.1.make_clone == true
 # https://github.com/inoxio/ansible-role-proxmox-vms/blob/master/tasks/main.yml
 # - name: Create virtual machines
 #   proxmox_kvm:
