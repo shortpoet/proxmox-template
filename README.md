@@ -99,6 +99,22 @@ ps aux | grep "/usr/bin/kvm -id $VMID" # get PID
 kill -9 PID
 ```
 
+- cycle clone with new user data
+
+```bash
+# local
+rsync /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/ansible/roles/310_proxmox_vms_create/configs/ubuntu-2004-user_data.yml proxmox:/var/lib/vz/snippets
+# host
+VM_ID='9999'
+VM_CLONE_ID='999'
+VM_IP='192.168.1.42'
+qm stop $VM_CLONE_ID && qm destroy $VM_CLONE_ID
+qm clone $VM_ID $VM_CLONE_ID --name ubuntu2004-cloud-template-ansible-clone --full
+qm start $VM_CLONE_ID
+#[How to ping in linux until host is known?](https://serverfault.com/questions/42021/how-to-ping-in-linux-until-host-is-known)
+until ping -c1 $VM_IP >/dev/null 2>&1; do :; done; echo "--> DONE"
+```
+
 ## Environment
 
 ```powershell
@@ -109,6 +125,7 @@ $env:PKR_VAR_WIN_IP_LOCAL=$((Get-NetIPConfiguration | Select-Object IPv4Address 
 
 ```bash
 export WIN_IP_LOCAL=$(pwsh.exe -c '$ip=$(Get-NetIPConfiguration | Select-Object IPv4Address -First 1);$ip.IPv4Address.IPAddress')
+export PROXMOX_AUTOMATION_PASSWORD=$(pass Homelab/proxmox/users/automation@pve)
 mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
 mkpasswd -m sha-512 $(pass Homelab/proxmox/users/automation@pve)
 ```
@@ -131,4 +148,10 @@ sftp -o stricthostkeychecking=no -o identityfile=~/.ssh/id_ed25519_proxmox notro
 # with sudo
 sftp -s "sudo /usr/lib/openssh/sftp-server" -o stricthostkeychecking=no -o identityfile=~/.ssh/id_ed25519_proxmox notroot@192.168.1.42
 # sftp> get /run/cloud-init/instance-data.json /run/cloud-init/instance-data-sensitive.json /etc/cloud/cloud.cfg
+```
+
+## ssh
+
+```bash
+ssh-keygen -f "/home/shortpoet/.ssh/known_hosts" -R "192.168.1.42" && ssh -o stricthostkeychecking=no -o identityfile=~/.ssh/id_ed25519_proxmox notroot@192.168.1.42
 ```
