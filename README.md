@@ -110,6 +110,7 @@ $env:PKR_VAR_WIN_IP_LOCAL=$((Get-NetIPConfiguration | Select-Object IPv4Address 
 ```bash
 export WIN_IP_LOCAL=$(pwsh.exe -c '$ip=$(Get-NetIPConfiguration | Select-Object IPv4Address -First 1);$ip.IPv4Address.IPAddress')
 mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
+mkpasswd -m sha-512 $(pass Homelab/proxmox/users/automation@pve)
 ```
 
 ## git (image files 😅)

@@ -59,7 +59,6 @@
   with_subelements:
     - "{{ distros }}"
     - releases
-
 - name: Create VM clone using Cloud-Init
   community.general.proxmox_kvm:
     node: "{{ pve_node }}"
@@ -111,6 +110,7 @@
   # notify: sleep
   register: created_vms_pve
   when: item.1.make_clone == true
+####
 # https://github.com/inoxio/ansible-role-proxmox-vms/blob/master/tasks/main.yml
 # - name: Create virtual machines
 #   proxmox_kvm:
