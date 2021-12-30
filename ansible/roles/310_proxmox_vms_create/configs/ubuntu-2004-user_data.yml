@@ -3,43 +3,32 @@ hostname: ubuntu2004
 manage_etc_hosts: true
 user: notroot
 # generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
-password: obQ2uKo7pGgRHE15shmXNsJzk
+# password: obQ2uKo7pGgRHE15shmXNsJzk
+password: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1"
 ssh_authorized_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
 chpasswd:
   expire: False
-###
-# # cloud-config
-# manage_etc_hosts: true
-# hostname: ubuntu-server-2004
-# user: notroot
-# password: notroot
-# # generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
-# # password: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1"
-# ssh_authorized_keys:
-#   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
-# chpasswd:
-#   expire: False
-# package_update: true
-# package_upgrade: true
-# packages:
-#   - curl
-#   - wget
-#   - lsb-release
-#   - openssh-server
-#   - ca-certificates # https://askubuntu.com/questions/857476/what-is-the-use-purpose-of-the-ca-certificates-package
-#   - ntp # network time protocol
-#   - vim
-#   - jq
-#   - zip
-#   - unzip
-#   - gnupg2
-#   - software-properties-common# https://askubuntu.com/questions/1000118/what-is-software-properties-common
-#   - python3-pip
-#   # - bc #  bc - An arbitrary precision calculator language
-#   # - open-vm-tools
-#   # - qemu-guest-agent
-# package_reboot_if_required: true
+package_update: true
+package_upgrade: true
+packages:
+  - curl
+  - wget
+  - lsb-release
+  - openssh-server
+  - ca-certificates # https://askubuntu.com/questions/857476/what-is-the-use-purpose-of-the-ca-certificates-package
+  - ntp # network time protocol
+  - vim
+  - jq
+  - zip
+  - unzip
+  - gnupg2
+  - software-properties-common # https://askubuntu.com/questions/1000118/what-is-software-properties-common
+  - python3-pip
+  # - bc #  bc - An arbitrary precision calculator language
+  # - open-vm-tools
+  # - qemu-guest-agent
+package_reboot_if_required: true
 #####
 # # cloud-config
 # hostname: ubuntu-server-2004
