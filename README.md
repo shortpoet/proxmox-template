@@ -120,3 +120,15 @@ mkpasswd -m sha-512 $(pass Homelab/proxmox/users/automation@pve)
 ```bash
 git filter-branch --force --index-filter 'git rm -r --cached --ignore-unmatch terraform/iso_base/hirsute-server-cloudimg-amd64.img' --prune-empty -- --all
 ```
+
+## comparing instances
+
+- sftp
+  - [How to use SFTP on a system that requires sudo for root access & ssh key based authentication?](https://unix.stackexchange.com/questions/111026/how-to-use-sftp-on-a-system-that-requires-sudo-for-root-access-ssh-key-based-a)
+
+```bash
+sftp -o stricthostkeychecking=no -o identityfile=~/.ssh/id_ed25519_proxmox notroot@192.168.1.91
+# with sudo
+sftp -s "sudo /usr/lib/openssh/sftp-server" -o stricthostkeychecking=no -o identityfile=~/.ssh/id_ed25519_proxmox notroot@192.168.1.42
+# sftp> get /run/cloud-init/instance-data.json /run/cloud-init/instance-data-sensitive.json /etc/cloud/cloud.cfg
+```

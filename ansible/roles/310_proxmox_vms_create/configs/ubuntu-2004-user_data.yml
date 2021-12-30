@@ -1,6 +1,9 @@
 #cloud-config
-hostname: ubuntu2004
+hostname: u2004-server-ansible
 manage_etc_hosts: true
+fqdn: ubuntu-server-2004.local.lab
+timezone: America/Chicago
+
 user: notroot
 # generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
 # password: obQ2uKo7pGgRHE15shmXNsJzk
@@ -9,6 +12,63 @@ ssh_authorized_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
 chpasswd:
   expire: False
+  # list: |
+  #   ubuntu:$6$JRWPNckuCpg$kb3/eoXAgiYOiBEFejpB.kItBpnRrEqrxYtuQQZoDrlmqF4.mrhUKFbnLqAZrSSUsay5eDjUM8.b6/5eUr.Ca0
+  #   notroot:$6$iLOJTxmjd$dm36v8Z8vxwZQe7gCy.XSoex.g2ZNnwdi7KzYjOdJiZbrYRC7BEA2YSBHN4r.nqjuX07EUdvCjYPq72jWSfnB/
+  #   root:$6$fn/XMZ7Dtm.$GUy5gcVK0zaNPv8yFzNWN6uufRKgoMSJJSXE3wYJTfWuVpzYkbxNWYrhL0hG2wILWOQXsRtzXNxtt3vQRYQOA/
+
+ssh_pwauth: yes
+ssh:
+  # For now we install openssh-server during package installs
+  install-server: true
+  allow-pw: true
+
+system_info:
+  default_user:
+    name: Ubuntu
+    plain_text_passwd: "ubuntu"
+    home: /home/ubuntu
+    shell: /bin/bash
+    lock_passwd: True
+    gecos: Ubuntu
+    groups:
+      [
+        notroot,
+        adm,
+        dialout,
+        cdrom,
+        floppy,
+        sudo,
+        audio,
+        dip,
+        video,
+        plugdev,
+        netdev,
+        lxd,
+      ]
+
+groups:
+  - ubuntu: [root, sys]
+  - not-root
+
+users:
+  - default
+  - name: notroot
+    gecos: NotRoot
+    # passwd: obQ2uKo7pGgRHE15shmXNsJzk
+    passwd: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1"
+    lock_passwd: false
+    groups: sudo, users, admin, adm, cdrom, sudo, dip, plugdev, lxd
+    shell: /bin/bash
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
+
+user-data:
+  disable_root: false
+
+disable_root: false
+
 package_update: true
 package_upgrade: true
 packages:
@@ -30,128 +90,55 @@ packages:
   # - qemu-guest-agent
 package_reboot_if_required: true
 #####
-# # cloud-config
-# hostname: ubuntu-server-2004
-# # fqdn: ubuntu-server-2004.local.lab
-# # timezone: Europe/Brussels
-# # system_info:
-# #   default_user:
-# #     name: Ubuntu
-# #     plain_text_passwd: 'ubuntu'
-# #     home: /home/ubuntu
-# #     shell: /bin/bash
-# #     lock_passwd: True
-# #     gecos: Ubuntu
-# #     groups: [adm, audio, cdrom, dialout, floppy, video, plugdev, dip, netdev]
-# # user-data:
-# #   disable_root: false
+# cloud-config
 
-# # disable_root: false
-# # ssh_pwauth: yes
-# # ssh:
-# #   # For now we install openssh-server during package installs
-# #   install-server: true
-# #   allow-pw: true
+# write_files:
+# - path: /etc/netplan/50-cloud-init.yaml
+#   content: |
+#     network:
+#      version: 2
+#      ethernets:
+#       ens192:
+#        addresses: [192.168.10.82/24]
+#        gateway4: 192.168.10.1
+#        dhcp6: false
+#        nameservers:
+#          addresses:
+#            - 192.168.10.2
+#            - 192.168.10.3
+#          search:
+#            - local.lab
+#        dhcp4: false
+#        optional: true
+# - path: /etc/sysctl.d/60-disable-ipv6.conf
+#   owner: root
+#   content: |
+#     net.ipv6.conf.all.disable_ipv6=1
+#     net.ipv6.conf.default.disable_ipv6=1
+# runcmd:
+#   # - netplan --debug apply
+#   # - sysctl -w net.ipv6.conf.all.disable_ipv6=1
+#   # - sysctl -w net.ipv6.conf.default.disable_ipv6=1
+#   - apt-get -y update
+#   - add-apt-repository universe
+#   # PowerShell
+#   - wget https://raw.githubusercontent.com/PowerShell/PowerShell/master/tools/installpsh-debian.sh
+#   - chmod 755 installpsh-debian.sh
+#   - ./installpsh-debian.sh
+#   # Git
+#   - git config --global user.name "shortpoet"
+#   - git config --global user.email "soriano.carlitos@gmail.com"
+#   - mkdir -p /home/notroot/source/repos/dots
+#   - chown -R notroot:notroot /home/notroot/source/repos/dots
+#   - git clone https://github.com/shortpoet/dots /home/notroot/source/repos/dots
 
-# manage_etc_hosts: true
-
-# # name: notroot
-# # # generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
-# # password: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1"
-# # ssh_authorized_keys:
-# #   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
-
-# # groups:
-# #   - ubuntu: [root, sys]
-# #   - not-root
-
-# users:
-#   - default
-#   - name: notroot
-#     gecos: NotRoot
-#     passwd: obQ2uKo7pGgRHE15shmXNsJzk
-#     lock_passwd: false
-#     groups: sudo, users, admin, adm, cdrom, sudo, dip, plugdev, lxd
-#     shell: /bin/bash
-#     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
-#     ssh_authorized_keys:
-#       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
-
-# # generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
-# chpasswd:
-#   # list: |
-#   #   ubuntu:$6$JRWPNckuCpg$kb3/eoXAgiYOiBEFejpB.kItBpnRrEqrxYtuQQZoDrlmqF4.mrhUKFbnLqAZrSSUsay5eDjUM8.b6/5eUr.Ca0
-#   #   notroot:$6$iLOJTxmjd$dm36v8Z8vxwZQe7gCy.XSoex.g2ZNnwdi7KzYjOdJiZbrYRC7BEA2YSBHN4r.nqjuX07EUdvCjYPq72jWSfnB/
-#   #   root:$6$fn/XMZ7Dtm.$GUy5gcVK0zaNPv8yFzNWN6uufRKgoMSJJSXE3wYJTfWuVpzYkbxNWYrhL0hG2wILWOQXsRtzXNxtt3vQRYQOA/
-#   expire: false
-
-# package_update: true
-# package_upgrade: true
-# packages:
-#   - curl
-#   - wget
-#   - lsb-release
-#   - openssh-server
-#   - ca-certificates # https://askubuntu.com/questions/857476/what-is-the-use-purpose-of-the-ca-certificates-package
-#   - ntp # network time protocol
-#   - vim
-#   - jq
-#   - zip
-#   - unzip
-#   - gnupg2
-#   - software-properties-common# https://askubuntu.com/questions/1000118/what-is-software-properties-common
-#   - python3-pip
-#   # - bc #  bc - An arbitrary precision calculator language
-#   # - open-vm-tools
-#   # - qemu-guest-agent
-# package_reboot_if_required: true
-# # write_files:
-# # - path: /etc/netplan/50-cloud-init.yaml
-# #   content: |
-# #     network:
-# #      version: 2
-# #      ethernets:
-# #       ens192:
-# #        addresses: [192.168.10.82/24]
-# #        gateway4: 192.168.10.1
-# #        dhcp6: false
-# #        nameservers:
-# #          addresses:
-# #            - 192.168.10.2
-# #            - 192.168.10.3
-# #          search:
-# #            - local.lab
-# #        dhcp4: false
-# #        optional: true
-# # - path: /etc/sysctl.d/60-disable-ipv6.conf
-# #   owner: root
-# #   content: |
-# #     net.ipv6.conf.all.disable_ipv6=1
-# #     net.ipv6.conf.default.disable_ipv6=1
-# # runcmd:
-# #   # - netplan --debug apply
-# #   # - sysctl -w net.ipv6.conf.all.disable_ipv6=1
-# #   # - sysctl -w net.ipv6.conf.default.disable_ipv6=1
-# #   - apt-get -y update
-# #   - add-apt-repository universe
-# #   # PowerShell
-# #   - wget https://raw.githubusercontent.com/PowerShell/PowerShell/master/tools/installpsh-debian.sh
-# #   - chmod 755 installpsh-debian.sh
-# #   - ./installpsh-debian.sh
-# #   # Git
-# #   - git config --global user.name "shortpoet"
-# #   - git config --global user.email "soriano.carlitos@gmail.com"
-# #   - mkdir -p /home/notroot/source/repos/dots
-# #   - chown -R notroot:notroot /home/notroot/source/repos/dots
-# #   - git clone https://github.com/shortpoet/dots /home/notroot/source/repos/dots
-
-# #   - apt clean -y
-# #   - apt autoremove --purge -y
-# power_state:
-#   delay: now
-#   mode: reboot
-#   message: Rebooting the OS
-#   condition: if [ -e /var/run/reboot-required ]; then exit 0; else exit 1; fi
+#   - apt clean -y
+#   - apt autoremove --purge -y
+power_state:
+  delay: now
+  mode: reboot
+  message: Rebooting the OS
+  condition: if [ -e /var/run/reboot-required ]; then exit 0; else exit 1; fi
 #####
 # users:
 #   - default

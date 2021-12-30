@@ -32,6 +32,7 @@
       ide2: "{{ storage_pool }}:cloudinit"
     bootdisk: scsi0
     cicustom: "user=local:snippets/{{ item.1.name }}-user_data.yml"
+    agent: yes
     # ciuser: user
     # cipassword: hallowelt
     net:
