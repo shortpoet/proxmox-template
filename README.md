@@ -107,12 +107,21 @@ rsync /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/ansible/roles/310_pr
 # host
 VM_ID='9999'
 VM_CLONE_ID='999'
-VM_IP='192.168.1.42'
 qm stop $VM_CLONE_ID && qm destroy $VM_CLONE_ID
-qm clone $VM_ID $VM_CLONE_ID --name ubuntu2004-cloud-template-ansible-clone --full
+qm clone $VM_ID $VM_CLONE_ID --name ubuntu2004-cloud-template-ansible-clone --full >/dev/null 2>&1
 qm start $VM_CLONE_ID
 #[How to ping in linux until host is known?](https://serverfault.com/questions/42021/how-to-ping-in-linux-until-host-is-known)
-until ping -c1 $VM_IP >/dev/null 2>&1; do :; done; echo "--> DONE"
+VM_IP='192.168.1.42'
+GREEN='\033[0;32m'
+MAGENTA='\033[0;35m'
+NC='\033[0m' # No Color
+# waits for sshd
+until nc -vzw 2 $VM_IP  22 >/dev/null 2>&1; do sleep 2; echo -e "..${MAGENTA}PING${NC}"; done; echo -e "--> ${GREEN}DONE${NC}"
+# up for a few before sshd is ready
+until ping -c1 $VM_IP >/dev/null 2>&1; do :; done; echo -e "--> ${GREEN}DONE${NC}"
+# local & ssh command
+rsync /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/ansible/roles/310_proxmox_vms_create/configs/ubuntu-2004-user_data.yml proxmox:/var/lib/vz/snippets && ssh proxmox 'cycle_vm 9999 999'
+
 ```
 
 ## Environment
