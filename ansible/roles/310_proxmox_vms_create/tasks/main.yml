@@ -47,12 +47,12 @@
   # loop_control:
   #   pause: 10
   # notify: sleep
-  register: created_vms_pve
+  register: created_templates_pve
 
+- debug:
+    var: created_templates_pve.results
 # - debug:
-#     var: created_vms_pve.results
-# - debug:
-#     var: created_vms_pve.results.item
+#     var: created_templates_pve.results.item
 - name: import init disk
   ansible.builtin.command:
     cmd: "qm importdisk {{ item.1.vmid }} /var/lib/vz/template/iso/{{ item.1.image }} {{ storage_pool }}"
@@ -60,6 +60,7 @@
   with_subelements:
     - "{{ distros }}"
     - releases
+
 - name: Create VM clone using Cloud-Init
   community.general.proxmox_kvm:
     node: "{{ pve_node }}"
@@ -84,6 +85,7 @@
       net0: "virtio,bridge=vmbr0"
     ipconfig:
       # TODO set ip range based on cluster size and avail ips
+      # this is ignored - prob due to user-data or template
       ipconfig0: "ip=192.168.1.200/24"
     proxmox_default_behavior: compatibility
   with_subelements:
@@ -92,7 +94,6 @@
   # loop_control:
   #   pause: 10
   # notify: sleep
-  register: created_vms_pve
   when: item.1.make_clone == true
 
 - name: Start Clone VM
@@ -103,13 +104,15 @@
     api_host: proxmox
     name: "{{ item.1.template_name }}-clone"
     state: started
+    timeout: 300
+  retries: 2
+  delay: 10
   with_subelements:
     - "{{ distros }}"
     - releases
   # loop_control:
   #   pause: 10
   # notify: sleep
-  register: created_vms_pve
   when: item.1.make_clone == true
 ####
 # https://github.com/inoxio/ansible-role-proxmox-vms/blob/master/tasks/main.yml

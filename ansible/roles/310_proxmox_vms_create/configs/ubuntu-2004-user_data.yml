@@ -118,15 +118,82 @@ packages:
   - gnupg2
   - software-properties-common # https://askubuntu.com/questions/1000118/what-is-software-properties-common
   - python3-pip
+  - qemu-guest-agent
+  - pwgen
+  - whois
+  - tmux
+  - autossh
+  - python3
+  - fail2ban
   # - bc #  bc - An arbitrary precision calculator language
-  # - open-vm-tools
-  # - qemu-guest-agent
 package_reboot_if_required: true
 runcmd:
   # - echo "RUN_CMD\n$(date +"%T.%N")" > /home/notroot/run.log
   # - echo "\nRUN" >> /home/notroot/.bashrc
   - >
-    echo "\nPS1='\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\[\033[01;35m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]'" >> /home/notroot/.bashrc
+    echo "\nPS1='\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[01;34m\]@\[\033[01;35m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]'" >> /home/notroot/.bashrc
   # - echo -e "LATE_CMD\n$(date +"%T.%N")" > /home/notroot/late.log
   # - echo -e "\nLATE" >> /home/notroot/.bashrc
-  - 'echo "\nPS1=''\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\[\033[01;35m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]''" >> /home/notroot/.bashrc'
+  - 'echo "\nPS1=''\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[01;34m\]@\[\033[01;35m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]''" >> /home/notroot/.bashrc'
+
+  # - sed -i 's/[#]*Port 22/Port 9726/g' /etc/ssh/sshd_config
+  # - sed -i 's/[#]*PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
+  # - sed -i 's/[#]*PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
+  # - sed -i 's/#HostKey \/etc\/ssh\/ssh_host_ed25519_key/HostKey \/etc\/ssh\/ssh_host_ed25519_key/g' /etc/ssh/sshd_config
+  # - systemctl reload ssh
+  # - echo 'notroot ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/notroot
+
+#   # - netplan --debug apply
+#   # - sysctl -w net.ipv6.conf.all.disable_ipv6=1
+#   # - sysctl -w net.ipv6.conf.default.disable_ipv6=1
+#   - apt-get -y update
+#   - add-apt-repository universe
+#   # PowerShell
+#   - wget https://raw.githubusercontent.com/PowerShell/PowerShell/master/tools/installpsh-debian.sh
+#   - chmod 755 installpsh-debian.sh
+#   - ./installpsh-debian.sh
+#   # Git
+#   - git config --global user.name "shortpoet"
+#   - git config --global user.email "soriano.carlitos@gmail.com"
+#   - mkdir -p /home/notroot/source/repos/dots
+#   - chown -R notroot:notroot /home/notroot/source/repos/dots
+#   - git clone https://github.com/shortpoet/dots /home/notroot/source/repos/dots
+
+#   - apt clean -y
+#   - apt autoremove --purge -y
+
+# write_files:
+# - path: /etc/netplan/50-cloud-init.yaml
+#   content: |
+#     network:
+#      version: 2
+#      ethernets:
+#       ens192:
+#        addresses: [192.168.10.82/24]
+#        gateway4: 192.168.10.1
+#        dhcp6: false
+#        nameservers:
+#          addresses:
+#            - 192.168.10.2
+#            - 192.168.10.3
+#          search:
+#            - local.lab
+#        dhcp4: false
+#        optional: true
+# - path: /etc/sysctl.d/60-disable-ipv6.conf
+#   owner: root
+#   content: |
+#     net.ipv6.conf.all.disable_ipv6=1
+#     net.ipv6.conf.default.disable_ipv6=1
+# # # network:
+# # #   renderers: ['netplan', 'eni', 'sysconfig']
+# # #   ethernets:
+# # #     eth0:
+# # #       dhcp4: true
+# # #   version: 2
+
+power_state:
+  delay: now
+  mode: reboot
+  message: Rebooting the OS
+  condition: if [ -e /var/run/reboot-required ]; then exit 0; else exit 1; fi

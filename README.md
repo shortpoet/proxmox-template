@@ -124,6 +124,16 @@ rsync /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/ansible/roles/310_pr
 
 ```
 
+- [ip / mac](https://github.com/xezpeleta/Ansible-Proxmox-inventory/issues/8#issuecomment-580628406)
+
+```bash
+# - get the mac address of the vm
+$vmid=''
+$mac=$(/usr/sbin/qm config $vmid | awk '/net0/ { print tolower($2) }' | sed -r 's/[^=]*=([0-9a-f:]*),.*/\1/g')
+# - get the ip address of the vm
+arp -an -i eth1 | grep $mac | cut -d' ' -f2 | sed -r 's/\((.*)\)/\1/g'
+```
+
 ## Environment
 
 ```powershell
