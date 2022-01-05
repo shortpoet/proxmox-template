@@ -8,12 +8,21 @@
     - releases
 
 - name: Synchronize user data file to snippets on proxmox node
-  ansible.posix.synchronize:
-    src: "../configs/{{ item.1.name }}-user_data.yml"
+  vars:
+    hostname: "{{ item.1.hostname }}"
+  ansible.builtin.template:
+    src: "../configs/{{ item.1.name }}-user_data.j2"
     dest: "/var/lib/vz/snippets/{{ item.1.name }}-user_data.yml"
   with_subelements:
     - "{{ distros }}"
     - releases
+# - name: Synchronize user data file to snippets on proxmox node
+#   ansible.posix.synchronize:
+#     src: "../configs/{{ item.1.name }}-user_data.yml"
+#     dest: "/var/lib/vz/snippets/{{ item.1.name }}-user_data.yml"
+#   with_subelements:
+#     - "{{ distros }}"
+#     - releases
 
 - name: Create VM template using Cloud-Init
   community.general.proxmox_kvm:
@@ -49,10 +58,11 @@
   # notify: sleep
   register: created_templates_pve
 
-- debug:
-    var: created_templates_pve.results
+# - debug:
+#     var: created_templates_pve.results
 # - debug:
 #     var: created_templates_pve.results.item
+
 - name: import init disk
   ansible.builtin.command:
     cmd: "qm importdisk {{ item.1.vmid }} /var/lib/vz/template/iso/{{ item.1.image }} {{ storage_pool }}"
@@ -70,8 +80,8 @@
     template: false
     name: "{{ item.1.template_name }}-clone"
     clone: "{{ item.1.template_name }}"
-    vmid: "9999"
-    newid: "999"
+    vmid: "{{ item.1.vmid }}"
+    newid: "{{ item.1.clone_id }}"
     scsihw: virtio-scsi-pci
     scsi:
       scsi0: "{{ storage_pool }}:vm-999-disk-0,format=raw"
@@ -95,6 +105,10 @@
   #   pause: 10
   # notify: sleep
   when: item.1.make_clone == true
+  register: created_clones_pve
+
+# - debug:
+#     var: created_clones_pve.results
 
 - name: Start Clone VM
   community.general.proxmox_kvm:
@@ -114,6 +128,80 @@
   #   pause: 10
   # notify: sleep
   when: item.1.make_clone == true
+  register: started_clones_pve
+
+# - debug:
+#     var: started_clones_pve.results
+
+- name: Check if VM ssh is up
+  vars:
+    interface_name: eth0
+  # delegate_to: proxmox
+  # script: ../scripts/is_ssh_up.sh
+  # shell: res=$(qm guest cmd 999 network-get-interfaces); echo $res | jq
+  # shell: qm guest cmd 999 network-get-interfaces | jq -r ".[]"
+  shell: >
+    qm guest cmd {{ item.1.clone_id }} network-get-interfaces 
+    | jq -r ".[] | select(.name == \"{{ interface_name | quote }}\").\"ip-addresses\"[] | select(.\"ip-address-type\" == \"ipv4\").\"ip-address\" "
+  # shell: >
+  #   qm guest cmd {{ item.1.clone_id }} network-get-interfaces
+  #   # | jq -r ".[] | select(.name == \"{{ interface_name | quote }}\")"
+  #   | jq -r '.[] | select(.name == \"{{ interface_name | quote }}\")."ip-addresses"[0]'
+  #   # | jq -r '.[] | select(.name == "eth0")."ip-addresses"[0]'
+  retries: 5
+  delay: 3
+  until: ip.rc == 0
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  # loop_control:
+  #   pause: 10
+  # notify: sleep
+  when: item.1.make_clone == true
+  register: ip
+# - name: Setting ip as fact
+#   when: item.1.make_clone == true
+#   set_fact:
+#     vm_ip: '{{ nics.results[i].stdout | from_json | json_query(''"ip-addresses"[0]."ip-address"'') }}'
+#   with_subelements:
+#     - "{{ distros }}"
+#     - releases
+#   loop_control:
+#     index_var: i
+
+- debug:
+    var: ip.results
+- debug:
+    var: ip.results[0].stdout
+# - debug:
+#     var: vm_ip
+
+- name: Add info to local ssh config
+  delegate_to: localhost
+  vars:
+    hostname: "{{ item.1.hostname }}"
+  blockinfile:
+    path: /mnt/c/Users/shortpoet/.ssh/config
+    block: |
+      Host {{ hostname }}
+      AddKeysToAgent yes
+      Hostname {{ ip.results[i].stdout }}
+      User notroot
+      IdentityFile ~/.ssh/id_ed25519_proxmox
+      IdentitiesOnly yes
+    marker: "{mark} ANSIBLE MANAGED BLOCK for proxmox VM {{ item.1.vmid }}"
+    marker_begin: "\n#"
+    marker_end: "#"
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  loop_control:
+    index_var: i
+# - name: Get existing deployment keys
+#   delegate_to: localhost
+#   shell: >
+#     curl -X GET -u shortpoet:{{gh_api_token}} {{gh_api_url}}
+#     | jq -r "."
 ####
 # https://github.com/inoxio/ansible-role-proxmox-vms/blob/master/tasks/main.yml
 # - name: Create virtual machines

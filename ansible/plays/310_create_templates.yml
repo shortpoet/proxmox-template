@@ -16,8 +16,10 @@
             url: https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
             image: focal-server-cloudimg-amd64.img
             vmid: 9999
+            clone_id: 999
             template_name: "ubuntu2004-cloud-template-ansible"
             make_clone: true
+            hostname: u2004-server-ansible
       #     - name: ubuntu-1804
       #       url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
       # - debian:
