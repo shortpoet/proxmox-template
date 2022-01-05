@@ -1,5 +1,15 @@
 # proxmox-template
 
+## dependencies
+
+- qemu-guest-agent
+- proxmoxer
+- ansible
+- python3
+- pip3
+- jmespath
+- jq
+
 ## resources
 
 - [engonzal/ansible_role_proxmox Public](https://github.com/engonzal/ansible_role_proxmox)
@@ -132,6 +142,7 @@ $vmid=''
 $mac=$(/usr/sbin/qm config $vmid | awk '/net0/ { print tolower($2) }' | sed -r 's/[^=]*=([0-9a-f:]*),.*/\1/g')
 # - get the ip address of the vm
 arp -an -i eth1 | grep $mac | cut -d' ' -f2 | sed -r 's/\((.*)\)/\1/g'
+qm guest cmd 999 network-get-interfaces | jq -r '.[] | select(.name == "eth0")."ip-addresses"[] | select(."ip-address-type" == "ipv4")."ip-address"'
 ```
 
 ## Environment
@@ -173,4 +184,12 @@ sftp -s "sudo /usr/lib/openssh/sftp-server" -o stricthostkeychecking=no -o ident
 
 ```bash
 ssh-keygen -f "/home/shortpoet/.ssh/known_hosts" -R "192.168.1.42" && ssh -o stricthostkeychecking=no -o identityfile=~/.ssh/id_ed25519_proxmox notroot@192.168.1.42
+```
+
+## dotfiles
+
+```bash
+pass Github/hamflavor-windows-pat
+mkdir repos; cd repos; git clone https://github.com/shortpoet-dots/linux.git/
+cd ~; chmod +x ./repos/linux/.bin/install.sh; ./repos/linux/.bin/install.sh
 ```
