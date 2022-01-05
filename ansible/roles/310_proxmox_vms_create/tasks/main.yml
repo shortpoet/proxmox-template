@@ -36,7 +36,11 @@
     vmid: "{{ item.1.vmid }}"
     scsihw: virtio-scsi-pci
     scsi:
+      # scsi0: "{{ storage_pool }}:32,format=raw"
       scsi0: "{{ storage_pool }}:vm-{{ item.1.vmid }}-disk-0,format=raw"
+    # scsi0: "{{ storage_pool }}:vm-{{ item.1.vmid }}-disk-0,format=raw,size=30G"
+    # virtio:
+    #   virtio0: "{{ storage_pool }}:32,format=raw"
     ide:
       ide2: "{{ storage_pool }}:cloudinit"
     bootdisk: scsi0
@@ -63,7 +67,7 @@
 # - debug:
 #     var: created_templates_pve.results.item
 
-- name: import init disk
+- name: Import init disk
   ansible.builtin.command:
     cmd: "qm importdisk {{ item.1.vmid }} /var/lib/vz/template/iso/{{ item.1.image }} {{ storage_pool }}"
     creates: "/dev/mapper/VMs-vm--{{ item.1.vmid }}--disk--0"
@@ -84,7 +88,11 @@
     newid: "{{ item.1.clone_id }}"
     scsihw: virtio-scsi-pci
     scsi:
-      scsi0: "{{ storage_pool }}:vm-999-disk-0,format=raw"
+      # scsi0: "{{ storage_pool }}:32,format=raw"
+      scsi0: "{{ storage_pool }}:vm-{{ item.1.vmid }}-disk-0,format=raw"
+      # scsi0: "{{ storage_pool }}:vm-{{ item.1.vmid }}-disk-0,format=raw,size=30G"
+    # virtio:
+    #   virtio0: "vmstore:32,format=raw"
     ide:
       ide2: "{{ storage_pool }}:cloudinit"
     bootdisk: scsi0
@@ -98,6 +106,7 @@
       # this is ignored - prob due to user-data or template
       ipconfig0: "ip=192.168.1.200/24"
     proxmox_default_behavior: compatibility
+    timeout: 1000
   with_subelements:
     - "{{ distros }}"
     - releases
@@ -109,6 +118,19 @@
 
 # - debug:
 #     var: created_clones_pve.results
+
+- name: Resize clone HD
+  vars:
+    interface_name: eth0
+    disk_size: "30G"
+  shell: "qm resize {{item.1.clone_id}} scsi0 +{{disk_size}}"
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  # loop_control:
+  #   pause: 10
+  # notify: sleep
+  when: item.1.make_clone == true
 
 - name: Start Clone VM
   community.general.proxmox_kvm:
@@ -136,21 +158,12 @@
 - name: Check if VM ssh is up
   vars:
     interface_name: eth0
-  # delegate_to: proxmox
-  # script: ../scripts/is_ssh_up.sh
-  # shell: res=$(qm guest cmd 999 network-get-interfaces); echo $res | jq
-  # shell: qm guest cmd 999 network-get-interfaces | jq -r ".[]"
   shell: >
     qm guest cmd {{ item.1.clone_id }} network-get-interfaces 
     | jq -r ".[] | select(.name == \"{{ interface_name | quote }}\").\"ip-addresses\"[] | select(.\"ip-address-type\" == \"ipv4\").\"ip-address\" "
-  # shell: >
-  #   qm guest cmd {{ item.1.clone_id }} network-get-interfaces
-  #   # | jq -r ".[] | select(.name == \"{{ interface_name | quote }}\")"
-  #   | jq -r '.[] | select(.name == \"{{ interface_name | quote }}\")."ip-addresses"[0]'
-  #   # | jq -r '.[] | select(.name == "eth0")."ip-addresses"[0]'
-  retries: 5
-  delay: 3
-  until: ip.rc == 0
+  retries: 8
+  delay: 5
+  until: ip.stderr == ""
   with_subelements:
     - "{{ distros }}"
     - releases
@@ -189,9 +202,12 @@
       User notroot
       IdentityFile ~/.ssh/id_ed25519_proxmox
       IdentitiesOnly yes
-    marker: "{mark} ANSIBLE MANAGED BLOCK for proxmox VM {{ item.1.vmid }}"
-    marker_begin: "\n#"
-    marker_end: "#"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for proxmox VM {{ item.1.vmid }}"
+    insertbefore: EOF
+    # newline screws up marker
+    # marker_begin: "\n#"
+    # marker_end: "#"
+    state: present
   with_subelements:
     - "{{ distros }}"
     - releases
