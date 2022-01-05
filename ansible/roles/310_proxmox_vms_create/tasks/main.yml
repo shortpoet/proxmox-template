@@ -87,10 +87,11 @@
     vmid: "{{ item.1.vmid }}"
     newid: "{{ item.1.clone_id }}"
     scsihw: virtio-scsi-pci
+    agent: yes
     scsi:
       # scsi0: "{{ storage_pool }}:32,format=raw"
-      scsi0: "{{ storage_pool }}:vm-{{ item.1.vmid }}-disk-0,format=raw"
-      # scsi0: "{{ storage_pool }}:vm-{{ item.1.vmid }}-disk-0,format=raw,size=30G"
+      scsi0: "{{ storage_pool }}:vm-{{ item.1.clone_id }}-disk-0,format=raw"
+      # scsi0: "{{ storage_pool }}:vm-{{ item.1.clone_id }}-disk-0,format=raw,size=30G"
     # virtio:
     #   virtio0: "vmstore:32,format=raw"
     ide:
@@ -154,6 +155,12 @@
 
 # - debug:
 #     var: started_clones_pve.results
+
+# - name: Start service httpd, if not started
+#   ansible.builtin.systemd:
+#     name: "qemu-guest-agent"
+#     state: started
+# daemon_reload: yes
 
 - name: Check if VM ssh is up
   vars:
