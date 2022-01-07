@@ -1,0 +1,41 @@
+#cloud-config
+autoinstall:
+  version: 1
+  datasource_list: [ NoCloud, ConfigDrive ]
+  locale: en_US
+  keyboard:
+    layout: en
+    variant: us
+  identity:
+    hostname: ubuntu-server-2004
+    username: notroot
+    # generate with mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
+    password: "$6$rounds=4096$FBDc7Tr2pawaO$CvC8LS3ItljMWGUtZHc0XXxs3x16lFeoeYrHQcyUqF6dc8HDacJ39APzCwrTDVaenjD1SZgINTg9noLoGHx2V1" 
+  user-data:
+    disable_root: false
+  ssh:
+    # For now we install openssh-server during package installs
+    allow-pw: true
+    install-server: false
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHNqLSuUBuN23f+/h+hVEA+0r7+mdX5+3D99g9tJoE38 proxmox
+  early-commands:
+    # Block inbound SSH to stop Packer trying to connect during initial install
+    # - iptables -A INPUT -p tcp --dport 22 -j DROP
+    - sudo systemctl stop ssh
+  late-commands:
+    - sed -i 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD:ALL/g' /etc/sudoers
+    - sed -i 's/^#*\(send dhcp-client-identifier\).*$/\1 = hardware;/' /target/etc/dhcp/dhclient.conf
+    - "echo 'Defaults:notroot !requiretty' > /target/etc/sudoers.d/notroot"
+    - "echo 'notroot ALL=(ALL) NOPASSWD: ALL' >> /target/etc/sudoers.d/notroot"
+    - "chmod 440 /target/etc/sudoers.d/notroot"
+    - 'sed -i "s/dhcp4: true/&\n      dhcp-identifier: mac/" /target/etc/netplan/00-installer-config.yaml'
+  packages:
+    - curl
+    - wget
+    - lsb-release
+    - openssh-server
+    - ntp # network time protocol
+    # - bc #  bc - An arbitrary precision calculator language
+    # - open-vm-tools
+    # - qemu-guest-agent 

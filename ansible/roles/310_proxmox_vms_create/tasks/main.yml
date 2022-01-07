@@ -7,22 +7,22 @@
     - "{{ distros }}"
     - releases
 
-- name: Synchronize user data file to snippets on proxmox node
-  vars:
-    hostname: "{{ item.1.hostname }}"
-  ansible.builtin.template:
-    src: "../configs/{{ item.1.name }}-user_data.j2"
-    dest: "/var/lib/vz/snippets/{{ item.1.name }}-user_data.yml"
-  with_subelements:
-    - "{{ distros }}"
-    - releases
 # - name: Synchronize user data file to snippets on proxmox node
-#   ansible.posix.synchronize:
-#     src: "../configs/{{ item.1.name }}-user_data.yml"
+#   vars:
+#     hostname: "{{ item.1.hostname }}"
+#   ansible.builtin.template:
+#     src: "../configs/{{ item.1.name }}-user_data.j2"
 #     dest: "/var/lib/vz/snippets/{{ item.1.name }}-user_data.yml"
 #   with_subelements:
 #     - "{{ distros }}"
 #     - releases
+- name: Synchronize user data file to snippets on proxmox node
+  ansible.posix.synchronize:
+    src: "../configs/{{ item.1.name }}-user_data.yml"
+    dest: "/var/lib/vz/snippets/{{ item.1.name }}-user_data.yml"
+  with_subelements:
+    - "{{ distros }}"
+    - releases
 
 - name: Create VM template using Cloud-Init
   community.general.proxmox_kvm:
@@ -142,6 +142,7 @@
     name: "{{ item.1.template_name }}-clone"
     state: started
     timeout: 300
+    agent: yes
   retries: 2
   delay: 10
   with_subelements:
@@ -156,20 +157,14 @@
 # - debug:
 #     var: started_clones_pve.results
 
-# - name: Start service httpd, if not started
-#   ansible.builtin.systemd:
-#     name: "qemu-guest-agent"
-#     state: started
-# daemon_reload: yes
-
 - name: Check if VM ssh is up
   vars:
     interface_name: eth0
   shell: >
     qm guest cmd {{ item.1.clone_id }} network-get-interfaces 
     | jq -r ".[] | select(.name == \"{{ interface_name | quote }}\").\"ip-addresses\"[] | select(.\"ip-address-type\" == \"ipv4\").\"ip-address\" "
-  retries: 8
-  delay: 5
+  retries: 30
+  delay: 6
   until: ip.stderr == ""
   with_subelements:
     - "{{ distros }}"

@@ -1,5 +1,5 @@
 #cloud-config
-hostname: u2004-server-ansible
+hostname: ansible-u2004-server
 manage_etc_hosts: true
 fqdn: ubuntu-server-2004.local.lab
 timezone: America/Chicago
@@ -128,13 +128,15 @@ packages:
   # - bc #  bc - An arbitrary precision calculator language
 package_reboot_if_required: true
 runcmd:
-  # - echo "RUN_CMD\n$(date +"%T.%N")" > /home/notroot/run.log
+  - echo "RUN_CMD\n$(date +"%T.%N")" > /home/notroot/run.log
   # - echo "\nRUN" >> /home/notroot/.bashrc
   - >
     echo "\nPS1='\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[01;34m\]@\[\033[01;35m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /home/notroot/.bashrc
   # - echo -e "LATE_CMD\n$(date +"%T.%N")" > /home/notroot/late.log
   # - echo -e "\nLATE" >> /home/notroot/.bashrc
   - 'echo "\nPS1=''\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[01;34m\]@\[\033[01;35m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ ''" >> /home/notroot/.bashrc'
+  - systemctl enable --now qemu-guest-agent
+  - systemctl start --now qemu-guest-agent
 
   # - sed -i 's/[#]*Port 22/Port 9726/g' /etc/ssh/sshd_config
   # - sed -i 's/[#]*PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config

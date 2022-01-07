@@ -1,0 +1,32 @@
+{
+  "builds": [
+    {
+      "name": "template",
+      "builder_type": "proxmox",
+      "build_time": 1641505333,
+      "files": null,
+      "artifact_id": "9005",
+      "packer_run_uuid": "42e604a5-3493-6f36-9674-cf590159254e",
+      "custom_data": null
+    },
+    {
+      "name": "template",
+      "builder_type": "proxmox",
+      "build_time": 1641513160,
+      "files": null,
+      "artifact_id": "9005",
+      "packer_run_uuid": "4b019aa0-864b-956c-3cd0-087e350940f2",
+      "custom_data": null
+    },
+    {
+      "name": "template",
+      "builder_type": "proxmox",
+      "build_time": 1641577847,
+      "files": null,
+      "artifact_id": "9005",
+      "packer_run_uuid": "3f6718f9-3503-cf18-02da-ca8a04a70e20",
+      "custom_data": null
+    }
+  ],
+  "last_run_uuid": "3f6718f9-3503-cf18-02da-ca8a04a70e20"
+}

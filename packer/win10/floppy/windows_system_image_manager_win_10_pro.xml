@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+    <cpi:offlineImage cpi:source="wim:c:/users/shortpoet/documents/disk-images/win10/windows%2010%20pro/winre.wim#Microsoft Windows Recovery Environment (x64)" xmlns:cpi="urn:schemas-microsoft-com:cpi" />
+</unattend>

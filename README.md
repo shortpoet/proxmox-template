@@ -18,18 +18,41 @@
 - [community.general.proxmox_template – management of OS templates in Proxmox VE cluster](https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_template_module.html#ansible-collections-community-general-proxmox-template-module)
 - [community.general.proxmox_tasks_info – Retrieve information about one or more Proxmox VE tasks](https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_tasks_info_module.html#ansible-collections-community-general-proxmox-tasks-info-module)
 - https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_kvm_module.html#ansible-collections-community-general-proxmox-kvm-module
+- [kalenarndt/packer-vsphere-cloud-init - Public](https://github.com/kalenarndt/packer-vsphere-cloud-init/blob/master/templates/ubuntu/20/data/user-data.pkrtpl.hcl)
 
 ## get images
 
-- [Get images](https://docs.openstack.org/image-guide/obtain-images.html)
+- linux
+  - [openstack - Get images](https://docs.openstack.org/image-guide/obtain-images.html)
+- windows
+
+  - [Windows Appendix A: KMS Client Setup Keys](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/jj612867(v=ws.11)>)
+  - get own product key
+
+  ```cmd
+  wmic path SoftwareLicensingService get OA3xOriginalProductKey
+  ```
+
+  - [realoriginal/windows10activation](https://gist.github.com/realoriginal/a1b35be405f86b6c7ba613a6fa189db6)
+  - [Key Management Services (KMS) client activation and product keys](https://docs.microsoft.com/en-us/windows-server/get-started/kms-client-activation-keys)
+  -
 
 ### Push Images
 
 ```bash
+# ubuntu
 ssh proxmox 'wget "http://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.qcow2" -P /var/lib/vz/template/iso/'
 ssh proxmox 'wget "https://releases.ubuntu.com/20.04/ubuntu-20.04.3-live-server-amd64.iso" -P /var/lib/vz/template/iso/'
 ssh proxmox 'wget "https://cdimage.debian.org/cdimage/release/current/amd64/iso-cd/debian-11.2.0-amd64-netinst.iso" -P /var/lib/vz/template/iso/'
 ssh proxmox 'wget "http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04.3-live-server-arm64.iso" -P /var/lib/vz/template/iso/'
+# windows
+ssh proxmox 'wget "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.208-1/virtio-win-0.1.208.iso" -P /var/lib/vz/template/iso/'
+scp "C:\Users\shortpoet\Documents\disk-images\win10\Win10_21H2_English_x64.iso" proxmox:/var/lib/vz/template/iso/Win10_21H2_English_x64.iso
+# xml -> iso
+cd /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10
+mkisofs -J -l -R -V "Label CD" -iso-level 4 -o Autounattend.iso "/mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/Autounattend.xml"
+scp Autounattend.iso proxmox:/var/lib/vz/template/iso/
+rm Autounattend.iso
 # or
 scp "C:/Users/shortpoet/Downloads/ubuntu-20.04.3-live-server-arm64.iso" proxmox:/var/lib/vz/template/iso/
 scp .\hirsute-server-cloudimg-amd64.img proxmox:/var/lib/vz/template/iso/
@@ -154,8 +177,9 @@ $env:PKR_VAR_WIN_IP_LOCAL=$((Get-NetIPConfiguration | Select-Object IPv4Address 
 ```
 
 ```bash
-export WIN_IP_LOCAL=$(pwsh.exe -c '$ip=$(Get-NetIPConfiguration | Select-Object IPv4Address -First 1);$ip.IPv4Address.IPAddress')
+export PKR_VAR_WIN_IP_LOCAL=$(pwsh.exe -c '$ip=$(Get-NetIPConfiguration | Select-Object IPv4Address -First 1);$ip.IPv4Address.IPAddress')
 export PROXMOX_AUTOMATION_PASSWORD=$(pass Homelab/proxmox/users/automation@pve)
+export PKR_VAR_proxmox_password=$(pass Homelab/proxmox/users/automation@pve)
 mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
 mkpasswd -m sha-512 $(pass Homelab/proxmox/users/automation@pve)
 ```
@@ -192,4 +216,17 @@ ssh-keygen -f "/home/shortpoet/.ssh/known_hosts" -R "192.168.1.42" && ssh -o str
 pass Github/hamflavor-windows-pat
 mkdir repos; cd repos; git clone https://github.com/shortpoet-dots/linux.git/
 cd ~; chmod +x ./repos/linux/.bin/install.sh; ./repos/linux/.bin/install.sh
+```
+
+## Packer
+
+### Windows
+
+- [GitLab](https://grot.geeks.org/tanner/packer-windows/-/tree/bae4d5b880a080e3d1a101224c0fe65e18711771)
+- [How to Extract Specific Files from Windows 10 ISO (Install.wim)](https://www.winhelponline.com/blog/extract-files-windows-10-iso-dvd-install-wim/)
+
+```powershell
+Mount-DiskImage -ImagePath C:\Users\shortpoet\Documents\disk-images\win10\Win10_21H2_English_x64.iso
+# elevated
+Get-WindowsImage -ImagePath e:\sources\install.wim
 ```

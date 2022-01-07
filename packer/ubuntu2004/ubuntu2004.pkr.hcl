@@ -64,33 +64,46 @@ source "proxmox" "template" {
 }
 
 build {
+
   sources = [
     "source.proxmox.template"
   ]
 
   provisioner "shell" {
-    pause_before = "20s"
-    environment_vars = [
-      "DEBIAN_FRONTEND=noninteractive",
-    ]
     inline = [
-      "sleep 30",
-      "sudo apt update -y",
-      "sudo apt -y upgrade",
-      "sudo apt -y dist-upgrade",
-      "sudo apt -y install linux-generic linux-headers-generic linux-image-generic",
-      "sudo apt -y install wget curl",
-
-      # DHCP Server assigns same IP address if machine-id is preserved, new machine-id will be generated on first boot
-      "sudo truncate -s 0 /etc/machine-id",
-      "exit 0",
+      "echo 'Waiting for cloud-init...'",
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done"
     ]
-    # inline = ["sudo rm -f /etc/cloud/cloud.cfg.d/99-installer.cfg", "sudo cloud-init clean", "sudo passwd -d ubuntu"]
-    # only   = ["proxmox"]
-
   }
+
+  # provisioner "ansible" {
+  #   playbook_file = "/mnt/h/source/orgs/shortpoet-ansible/role-dotfiles/install.yml"
+  # }
+
+  # provisioner "shell" {
+  #   pause_before = "20s"
+  #   environment_vars = [
+  #     "DEBIAN_FRONTEND=noninteractive",
+  #   ]
+  #   inline = [
+  #     "sleep 30",
+  #     "sudo apt update -y",
+  #     "sudo apt -y upgrade",
+  #     "sudo apt -y dist-upgrade",
+  #     # "sudo apt -y install linux-generic linux-headers-generic linux-image-generic",
+  #     # "sudo apt -y install wget curl",
+
+  #     # DHCP Server assigns same IP address if machine-id is preserved, new machine-id will be generated on first boot
+  #     "sudo truncate -s 0 /etc/machine-id",
+  #     "exit 0",
+  #   ]
+  #   # inline = ["sudo rm -f /etc/cloud/cloud.cfg.d/99-installer.cfg", "sudo cloud-init clean", "sudo passwd -d ubuntu"]
+  #   # only   = ["proxmox"]
+  # }
+
   post-processor "manifest" {
     output     = "${path.root}/packer-manifest.json"
     strip_path = true
   }
+
 }

@@ -1,3 +1,4 @@
+
 #############################################################
 # Proxmox variables
 #############################################################
@@ -18,11 +19,6 @@ variable "proxmox_password" {
   description = "Proxmox password"
   type = string
 }
-# variable "PROXMOX_TOKEN" {
-#   type = string
-#   sensitive = true
-#   default = env("PROXMOX_TOKEN")
-# }
 
 variable "proxmox_node_name" {
   description = "Proxmox node"
@@ -39,14 +35,6 @@ variable "proxmox_insecure_skip_tls_verify" {
 #############################################################
 # Template variables
 #############################################################
-variable "WIN_IP_LOCAL" {
-  description = <<-EOT
-    $env:PKR_VAR_WIN_IP_LOCAL=$((Get-NetIPConfiguration | Select-Object IPv4Address -First 1).IPv4Address.IPAddress)
-    or
-    export WIN_IP_LOCAL=$(pwsh.exe -c '$ip=$(Get-NetIPConfiguration | Select-Object IPv4Address -First 1);$ip.IPv4Address.IPAddress')
-  EOT
-  type = string
-}
 
 variable "iso_url" {
   description = "ISO image download link"
@@ -78,10 +66,10 @@ variable "pool" {
   default = "templates"
 }
 
-variable "template_description" {
-  description = "Template description"
-  type = string
-}
+# variable "template_description" {
+#   description = "Template description"
+#   type = string
+# }
 
 variable "vm_id" {
   description = "VM template ID"
@@ -93,7 +81,7 @@ variable "vm_name" {
   type = string
 }
 
-variable "vm_cores" {
+variable "vm_cpu_cores" {
   description = "VM amount of memory"
   type = number
   default = 2
@@ -102,13 +90,17 @@ variable "vm_cores" {
 variable "vm_memory" {
   description = "VM amount of memory"
   type = number
-  default = 2048
+  default = 8192
 }
 
 variable "vm_sockets" {
   description = "VM amount of CPU sockets"
   type = number
   default = 1
+}
+variable "disk_size" {
+  type    = string
+  default = "30G"
 }
 
 variable "disk_storage_format" {
@@ -129,23 +121,20 @@ variable "disk_storage_pool_type" {
   description = "Storage pool type"
 }
 
-
 #############################################################
 # OS Settings
 #############################################################
-variable "ssh_username" {
-  description = "Default ssh username"
+
+variable "virtio_driver_iso" {
   type = string
-  default = "notroot"
 }
 
-# variable "user_password" {
-#   description = "Default user password"
-#   type = string
-# }
+variable "winrm_password" {
+  type    = string
+  default = ""
+}
 
-variable "time_zone" {
-  description = "Time Zone"
-  type = string
-  default = "UTC"
+variable "winrm_username" {
+  type    = string
+  default = ""
 }
