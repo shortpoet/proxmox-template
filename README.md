@@ -39,13 +39,24 @@
 
 ### Push Images
 
+- ubuntu
+
 ```bash
 # ubuntu
 ssh proxmox 'wget "http://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.qcow2" -P /var/lib/vz/template/iso/'
 ssh proxmox 'wget "https://releases.ubuntu.com/20.04/ubuntu-20.04.3-live-server-amd64.iso" -P /var/lib/vz/template/iso/'
 ssh proxmox 'wget "https://cdimage.debian.org/cdimage/release/current/amd64/iso-cd/debian-11.2.0-amd64-netinst.iso" -P /var/lib/vz/template/iso/'
 ssh proxmox 'wget "http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04.3-live-server-arm64.iso" -P /var/lib/vz/template/iso/'
+# or
+scp "C:/Users/shortpoet/Downloads/ubuntu-20.04.3-live-server-arm64.iso" proxmox:/var/lib/vz/template/iso/
+scp .\hirsute-server-cloudimg-amd64.img proxmox:/var/lib/vz/template/iso/
+```
+
+- windows
+
+```bash
 # windows
+# proxmox
 ssh proxmox 'wget "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.208-1/virtio-win-0.1.208.iso" -P /var/lib/vz/template/iso/'
 scp "C:\Users\shortpoet\Documents\disk-images\win10\Win10_21H2_English_x64.iso" proxmox:/var/lib/vz/template/iso/Win10_21H2_English_x64.iso
 # xml -> iso
@@ -53,9 +64,8 @@ cd /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10
 mkisofs -J -l -R -V "Label CD" -iso-level 4 -o Autounattend.iso "/mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/Autounattend.xml"
 scp Autounattend.iso proxmox:/var/lib/vz/template/iso/
 rm Autounattend.iso
-# or
-scp "C:/Users/shortpoet/Downloads/ubuntu-20.04.3-live-server-arm64.iso" proxmox:/var/lib/vz/template/iso/
-scp .\hirsute-server-cloudimg-amd64.img proxmox:/var/lib/vz/template/iso/
+# local
+wget "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.208-1/virtio-win-0.1.208.iso" -P /mnt/h/source/iso/win10
 ```
 
 ### Ubuntu
@@ -226,7 +236,8 @@ cd ~; chmod +x ./repos/linux/.bin/install.sh; ./repos/linux/.bin/install.sh
 - [How to Extract Specific Files from Windows 10 ISO (Install.wim)](https://www.winhelponline.com/blog/extract-files-windows-10-iso-dvd-install-wim/)
 
 ```powershell
-Mount-DiskImage -ImagePath C:\Users\shortpoet\Documents\disk-images\win10\Win10_21H2_English_x64.iso
+Mount-DiskImage -ImagePath H:\source\iso\win10\Win10_21H2_English_x64.iso
+Mount-DiskImage -ImagePath H:\source\iso\win10\virtio-win-0.1.208.iso
 # elevated
 Get-WindowsImage -ImagePath e:\sources\install.wim
 ```

@@ -28,6 +28,7 @@
       User notroot
       IdentityFile ~/.ssh/id_ed25519_proxmox
       IdentitiesOnly yes
+      ForwardAgent yes
     marker: "# {mark} ANSIBLE MANAGED BLOCK for proxmox VM {{ clone_id }}"
     insertbefore: EOF
     # newline screws up marker
