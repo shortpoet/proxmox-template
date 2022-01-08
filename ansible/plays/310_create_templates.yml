@@ -57,3 +57,6 @@
 # - name: Print all available facts
 #   ansible.builtin.debug:
 #     var: ansible_facts
+# - name: Install Dotfiles
+#   hosts:
+#   import_playbook: /mnt/h/source/orgs/shortpoet-ansible/role-dotfiles/install.yml
