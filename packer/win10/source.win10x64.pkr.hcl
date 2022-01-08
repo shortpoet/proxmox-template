@@ -1,11 +1,5 @@
 
-# The "legacy_isotime" function has been provided for backwards compatability, but we recommend switching to the timestamp and formatdate functions.
-
-locals {
-  template_description = "Windows 10 64-bit Enterprise template built with Packer - ${legacy_isotime("2006-01-02 03:04:05")}"
-}
-
-source "proxmox" "template" {
+source "proxmox" "win10x64_template" {
   proxmox_url              = "${var.proxmox_hostname}/api2/json"
   insecure_skip_tls_verify = "${var.proxmox_insecure_skip_tls_verify}"
   username                 = var.proxmox_username
@@ -73,21 +67,6 @@ source "proxmox" "template" {
     device   = "ide3"
     iso_file = "${var.iso_storage_pool}/${var.virtio_driver_iso}"
     unmount  = true
-  }
-
-}
-
-build {
-  sources = [
-    "source.proxmox.template"
-  ]
-
-  provisioner "windows-shell" {
-    scripts = ["scripts/Disable-WinUpdate.bat"]
-  }
-
-  provisioner "powershell" {
-    scripts = ["scripts/Disable-Hibernate.ps1"]
   }
 
 }

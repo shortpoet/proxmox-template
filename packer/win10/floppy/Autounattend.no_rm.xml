@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
-
-  <!-- computer name on network: VAGRANT-50DDSO0 -->
-
   <settings pass="windowsPE">
-
     <component name="Microsoft-Windows-PnpCustomizationsWinPE" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
       <DriverPaths>
@@ -40,7 +36,6 @@
         </PathAndCredentials>
       </DriverPaths>
     </component>
-
     <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -53,8 +48,6 @@
       <UILanguageFallback>en-US</UILanguageFallback>
       <UserLocale>en-US</UserLocale>
     </component>
-
-
     <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -109,7 +102,13 @@
       </UserData>
     </component>
   </settings>
-
+  <settings pass="offlineServicing">
+    <component name="Microsoft-Windows-LUA-Settings" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <EnableLUA>false</EnableLUA>
+    </component>
+  </settings>
   <settings pass="generalize">
     <component name="Microsoft-Windows-Security-SPP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
@@ -117,24 +116,7 @@
       <SkipRearm>1</SkipRearm>
     </component>
   </settings>
-
   <settings pass="specialize">
-
-    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-      <ComputerName>packer-win10</ComputerName>
-      <ProductKey>VK7JG-NPHTM-C97JM-9MPGT-3V66T</ProductKey>
-      <!-- <ProductKey>W269N-WFGWX-YVC9B-4J6C9-T83GX</ProductKey> -->
-      <OEMInformation>
-        <HelpCustomized>false</HelpCustomized>
-      </OEMInformation>
-      <!-- <ComputerName>*</ComputerName> -->
-      <!-- <TimeZone>{{vm_time_zone}}</TimeZone> -->
-      <!-- <RegisteredOwner/> -->
-    </component>
-
-
     <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -144,13 +126,28 @@
       <UILanguageFallback>en-US</UILanguageFallback>
       <UserLocale>en-US</UserLocale>
     </component>
-
+    <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <SkipAutoActivation>true</SkipAutoActivation>
+    </component>
+    <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <CEIPEnabled>0</CEIPEnabled>
+    </component>
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <ComputerName>packer-win10</ComputerName>
+      <ProductKey>VK7JG-NPHTM-C97JM-9MPGT-3V66T</ProductKey>
+      <!-- <ProductKey>W269N-WFGWX-YVC9B-4J6C9-T83GX</ProductKey> -->
+    </component>
     <component name="Microsoft-Windows-TerminalServices-LocalSessionManager" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <fDenyTSConnections>false</fDenyTSConnections>
     </component>
-
     <component name="Networking-MPSSVC-Svc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -162,46 +159,12 @@
         </FirewallGroup>
       </FirewallGroups>
     </component>
-
     <component name="Microsoft-Windows-TerminalServices-RDP-WinStationExtensions" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-      <SecurityLayer>1</SecurityLayer>
       <UserAuthentication>0</UserAuthentication>
     </component>
   </settings>
-
-  <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <SkipAutoActivation>true</SkipAutoActivation>
-  </component>
-
-  <component name="Microsoft-Windows-ServerManager-SvrMgrNc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <DoNotOpenServerManagerAtLogon>true</DoNotOpenServerManagerAtLogon>
-  </component>
-  <component name="Microsoft-Windows-IE-ESC" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <IEHardenAdmin>false</IEHardenAdmin>
-    <IEHardenUser>false</IEHardenUser>
-  </component>
-  <component name="Microsoft-Windows-OutOfBoxExperience" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <DoNotOpenInitialConfigurationTasksAtLogon>true</DoNotOpenInitialConfigurationTasksAtLogon>
-  </component>
-
-
-  <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <CEIPEnabled>0</CEIPEnabled>
-  </component>
-
-
   <settings pass="oobeSystem">
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
@@ -237,9 +200,6 @@
           </LocalAccount>
         </LocalAccounts>
       </UserAccounts>
-
-      <!-- <RegisteredOwner /> -->
-
       <AutoLogon>
         <Password>
           <Value>dgBhAGcAcgBhAG4AdABQAGEAcwBzAHcAbwByAGQA</Value>
@@ -250,97 +210,47 @@
       </AutoLogon>
 
       <FirstLogonCommands>
-
         <SynchronousCommand wcm:action="add">
-          <CommandLine>%SystemRoot%\System32\reg.exe ADD HKLM\SYSTEM\CurrentControlSet\Control\Network\NewNetworkWindowOff /f</CommandLine>
+          <Description>Disable the network discovery prompt window</Description>
           <Order>1</Order>
-          <Description>Disable Network Discovery Prompt</Description>
+          <CommandLine>reg add HKLM\System\CurrentControlSet\Control\Network\NewNetworkWindowOff</CommandLine>
+          <RequiresUserInput>true</RequiresUserInput>
         </SynchronousCommand>
-
-        <!-- {% if agent is match("enabled=1") %} -->
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "F:\guest-agent\qemu-ga-x86_64.msi /quiet"</CommandLine>
           <Order>2</Order>
-          <Description>Install qemu-guest-agent</Description>
+          <Description>Run all *.bat and *.cmd scripts on drive A:</Description>
+          <RequiresUserInput>true</RequiresUserInput>
+          <CommandLine>cmd.exe /c a:\00-run-all-scripts.cmd</CommandLine>
         </SynchronousCommand>
-        <!-- {% endif %} -->
-
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File e:\scripts\AnsiblePrep.ps1</CommandLine>
-          <Description>Configure Ansible Prep and WinRM</Description>
           <Order>3</Order>
+          <RequiresUserInput>false</RequiresUserInput>
+          <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1'))"</CommandLine>
+          <Description>Password Never Expires</Description>
         </SynchronousCommand>
-
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File e:\scripts\win-updates-pass1.ps1</CommandLine>
-          <Description>Install Get-WindowsUpdate module and Windows Updates Pass 1</Description>
           <Order>4</Order>
+          <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "netsh advfirewall firewall set rule group='Windows Remote Management' new enable=yes"</CommandLine>
         </SynchronousCommand>
-
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell Start-Sleep -Seconds 20</CommandLine>
-          <Description>Insert a pause to prevent update pass 2 from starting just before reboot</Description>
           <Order>5</Order>
+          <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "netsh advfirewall firewall add rule name='ICMP Allow incoming V4 echo request' protocol=icmpv4:8,any dir=in action=allow"</CommandLine>
         </SynchronousCommand>
-
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File e:\scripts\win-updates-pass2.ps1</CommandLine>
-          <Description>Install Windows Updates Pass 2</Description>
           <Order>6</Order>
+          <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-NetAdapter | foreach { Disable-NetAdapterBinding -InterfaceAlias $_.Name -ComponentID ms_tcpip6 }"</CommandLine>
         </SynchronousCommand>
-
-        <!-- <SynchronousCommand wcm:action="add"> -->
-        <!-- <Order>4</Order> -->
-        <!-- <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "netsh advfirewall firewall set rule group='Windows Remote Management' new enable=yes"</CommandLine> -->
-        <!-- </SynchronousCommand> -->
-
-        <!-- <SynchronousCommand wcm:action="add"> -->
-        <!-- <Order>5</Order> -->
-        <!-- <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "netsh advfirewall firewall add rule name='ICMP Allow incoming V4 echo request' protocol=icmpv4:8,any dir=in action=allow"</CommandLine> -->
-        <!-- </SynchronousCommand> -->
-
-        <!-- <SynchronousCommand wcm:action="add"> -->
-        <!-- <Order>6</Order> -->
-        <!-- <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-NetAdapter | foreach { Disable-NetAdapterBinding -InterfaceAlias $_.Name -ComponentID ms_tcpip6 }"</CommandLine> -->
-        <!-- </SynchronousCommand> -->
-
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell Start-Sleep -Seconds 25</CommandLine>
-          <Description>Insert a pause to prevent possible reboot during sysprep</Description>
           <Order>7</Order>
+          <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "F:\guest-agent\qemu-ga-x86_64.msi /quiet"</CommandLine>
         </SynchronousCommand>
-
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell Start-Sleep -Seconds 30</CommandLine>
-          <Description>One more pause to prevent an early sysprep start</Description>
           <Order>8</Order>
+          <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "netsh interface teredo set state disabled"</CommandLine>
         </SynchronousCommand>
-
-        <SynchronousCommand wcm:action="add">
-          <CommandLine>c:\windows\system32\sysprep\sysprep /generalize /oobe /shutdown</CommandLine>
-          <Description>Sysprep</Description>
-          <Order>10</Order>
-        </SynchronousCommand>
-
-
-        <!-- <SynchronousCommand wcm:action="add"> -->
-        <!-- <Order>8</Order> -->
-        <!-- <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "netsh interface teredo set state disabled"</CommandLine> -->
-        <!-- </SynchronousCommand> -->
-
       </FirstLogonCommands>
     </component>
-
   </settings>
-
-  <settings pass="offlineServicing">
-    <component name="Microsoft-Windows-LUA-Settings" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-      <EnableLUA>false</EnableLUA>
-    </component>
-  </settings>
-
   <cpi:offlineImage cpi:source="wim:c:/users/shortpoet/documents/disk-images/win10/install.wim#Windows 10 Pro"
     xmlns:cpi="urn:schemas-microsoft-com:cpi" />
 </unattend>

@@ -164,6 +164,47 @@ runcmd:
 #   - apt clean -y
 #   - apt autoremove --purge -y
 
+# base config from using install.sh > 998 (2004clone-cloud-init) 9002
+# # cat /etc/netplan/50-cloud-init.yaml
+# network:
+#     version: 2
+#     ethernets:
+#         eth0:
+#             addresses:
+#             - 192.168.1.99/24
+#             gateway4: 192.168.1.1
+#             match:
+#                 macaddress: f6:cf:0c:3f:ab:a7
+#             nameservers:
+#                 addresses:
+#                 - 192.168.1.1
+#                 search:
+#                 - shortpoet.com
+#             set-name: eth0
+# has more fields than ansible
+# network:
+#     version: 2
+#     ethernets:
+#         eth0:
+#             dhcp4: true
+#             match:
+#                 macaddress: 6e:57:32:f7:40:2e
+#             set-name: eth0
+# # or packer which uses ens18
+# # notroot@packer-u2004-server:~$ cat /etc/netplan/00-installer-config.yaml
+# # This is the network config written by 'subiquity'
+# network:
+#   ethernets:
+#     ens18:
+#       critical: true
+#       dhcp-identifier: mac
+#       dhcp4: true
+#       nameservers:
+#         addresses:
+#         - 192.168.1.1
+#         search:
+#         - localdomain
+#   version: 2
 # write_files:
 # - path: /etc/netplan/50-cloud-init.yaml
 #   content: |
