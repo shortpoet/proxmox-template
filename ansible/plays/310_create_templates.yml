@@ -21,6 +21,18 @@
             make_clone: true
             hostname: ansible-u2004-server
             provisioner: ansible
+            make_template: true
+            interface_name: eth0
+          # question: how will this uploaded user-data change the image
+          - name: ubuntu-2004
+            vmid: 9005
+            clone_id: 997
+            template_name: packer-u2004-server
+            make_clone: true
+            hostname: packer-u2004-server
+            provisioner: packer
+            make_template: false
+            interface_name: ens18
       #     - name: ubuntu-1804
       #       url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
       # - debian:

@@ -4,7 +4,7 @@
     api_user: "{{ pve_apiuser }}"
     api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
     api_host: proxmox
-    name: "ansible-{{ vmid }}-00"
+    name: "{{ provisioner }}-{{ vmid }}-00"
     state: started
     timeout: 300
     agent: yes

@@ -8,9 +8,11 @@
     template_name: "{{ item.1.template_name }}"
     vmid: "{{ item.1.vmid }}"
     image: "{{ item.1.image }}"
+    make_template: "{{ item.1.make_template }}"
   with_subelements:
     - "{{ distros }}"
     - releases
+  when: item.1.make_template == true
   # loop_control:
   #   pause: 10
   # notify: sleep
@@ -22,6 +24,7 @@
     name: "{{ item.1.name }}"
     template_name: "{{ item.1.template_name }}"
     clone_id: "{{ item.1.clone_id }}"
+    provisioner: "{{ item.1.provisioner }}"
     make_clone: "{{ item.1.make_clone }}"
   with_subelements:
     - "{{ distros }}"
@@ -34,6 +37,7 @@
   include_tasks: 02-start_vm.yml
   vars:
     vmid: "{{ item.1.vmid }}"
+    provisioner: "{{ item.1.provisioner }}"
     make_clone: "{{ item.1.make_clone }}"
   with_subelements:
     - "{{ distros }}"
@@ -47,8 +51,8 @@
   vars:
     clone_id: "{{ item.1.clone_id }}"
     make_clone: "{{ item.1.make_clone }}"
-    interface_name: eth0
     hostname: "{{ item.1.hostname }}"
+    interface_name: "{{ item.1.interface_name }}"
   with_subelements:
     - "{{ distros }}"
     - releases

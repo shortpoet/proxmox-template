@@ -1,3 +1,10 @@
+- name: Display clone being created
+  vars:
+    msg: "Cloning {{ vmid }} - {{ template_name }} to {{ clone_id }} - {{ provisioner }}-{{ vmid }}-00"
+  debug:
+    var: msg
+  when: make_clone == true
+
 - name: Create VM clone using Cloud-Init
   community.general.proxmox_kvm:
     node: "{{ pve_node }}"
@@ -5,7 +12,7 @@
     api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
     api_host: proxmox
     template: false
-    name: "ansible-{{ vmid }}-00"
+    name: "{{ provisioner }}-{{ vmid }}-00"
     clone: "{{ template_name }}"
     vmid: "{{ vmid }}"
     newid: "{{ clone_id }}"

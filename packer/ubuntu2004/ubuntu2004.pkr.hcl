@@ -1,13 +1,19 @@
 locals {
+  uri = "http://${var.WIN_IP_LOCAL}:{{ .HTTPPort }}/" 
+  boot0 = "<wait><enter><esc><wait5><f6><esc><wait> <bs><bs><bs><bs><bs> <bs><bs><bs><bs><bs> /casper/vmlinuz "
+  boot1 = "initrd=/casper/initrd ip=dhcp autoinstall ds=nocloud-net;s=${local.uri} --- <enter>"
   boot_command = [
-    "<wait><enter><esc><wait5><f6><esc><wait>",
-    "<bs><bs><bs><bs><bs>",
-    "<bs><bs><bs><bs><bs>",
-    "/casper/vmlinuz ",
-    "initrd=/casper/initrd ",
-    "ip=dhcp ",
-    "autoinstall ds=nocloud-net;s=http://${var.WIN_IP_LOCAL}:{{ .HTTPPort }}/ ",
-    "--- <enter>"
+    "${local.boot0}${local.boot1}"
+    # "<wait><enter><esc><wait5><f6><esc><wait>",
+    # "<bs><bs><bs><bs><bs>",
+    # "<bs><bs><bs><bs><bs>",
+    # "/casper/vmlinuz ",
+    # "initrd=/casper/initrd ",
+    # "ip=dhcp ",
+    # "autoinstall ds=nocloud-net;s=http://${var.WIN_IP_LOCAL}:{{ .HTTPPort }}/ ",
+    # "--- <enter>"
+    # "<wait><enter><esc><wait5><f6><esc><wait> <bs><bs><bs><bs><bs> <bs><bs><bs><bs><bs> /casper/vmlinuz initrd=/casper/initrd ip=dhcp autoinstall ds=nocloud-net;s=${local.uri} --- <enter>"
+    
   ]
 }
 source "proxmox" "template" {

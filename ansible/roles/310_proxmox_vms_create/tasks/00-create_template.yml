@@ -3,6 +3,7 @@
   get_url:
     url: "{{ url }}"
     dest: /var/lib/vz/template/iso/{{ image }}
+  when: make_template == true
 
 - name: Synchronize user data file to snippets on proxmox node
   vars:
@@ -10,6 +11,7 @@
   ansible.builtin.template:
     src: "../configs/{{ name }}-user_data.j2"
     dest: "/var/lib/vz/snippets/{{ name }}-user_data.yml"
+  when: make_template == true
 
 - name: Create VM template using Cloud-Init
   community.general.proxmox_kvm:
@@ -42,8 +44,10 @@
       # ipconfig0: "ip=192.168.1.200/24"
     proxmox_default_behavior: compatibility
   register: created_templates_pve
+  when: make_template == true
 
 - name: Import init disk
   ansible.builtin.command:
     cmd: "qm importdisk {{ vmid }} /var/lib/vz/template/iso/{{ image }} {{ storage_pool }}"
     creates: "/dev/mapper/VMs-vm--{{ vmid }}--disk--0"
+  when: make_template == true
