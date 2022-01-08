@@ -1,0 +1,216 @@
+- name: Download cloud image
+  get_url:
+    url: "{{ item.1.url }}"
+    dest: /var/lib/vz/template/iso/{{ item.1.image }}
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+
+# - name: Synchronize user data file to snippets on proxmox node
+#   vars:
+#     hostname: "{{ item.1.hostname }}"
+#   ansible.builtin.template:
+#     src: "../configs/{{ item.1.name }}-user_data.j2"
+#     dest: "/var/lib/vz/snippets/{{ item.1.name }}-user_data.yml"
+#   with_subelements:
+#     - "{{ distros }}"
+#     - releases
+- name: Synchronize user data file to snippets on proxmox node
+  ansible.posix.synchronize:
+    src: "../configs/{{ item.1.name }}-user_data.yml"
+    dest: "/var/lib/vz/snippets/{{ item.1.name }}-user_data.yml"
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+
+- name: Create VM template using Cloud-Init
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_apiuser }}"
+    # api_password: "{{ lookup('passwordstore', 'Homelab/proxmox/users/automation@pve') }}"
+    api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
+    api_host: proxmox
+    template: true
+    name: "{{ item.1.template_name }}"
+    vmid: "{{ item.1.vmid }}"
+    scsihw: virtio-scsi-pci
+    scsi:
+      # scsi0: "{{ storage_pool }}:32,format=raw"
+      scsi0: "{{ storage_pool }}:vm-{{ item.1.vmid }}-disk-0,format=raw"
+    # scsi0: "{{ storage_pool }}:vm-{{ item.1.vmid }}-disk-0,format=raw,size=30G"
+    # virtio:
+    #   virtio0: "{{ storage_pool }}:32,format=raw"
+    ide:
+      ide2: "{{ storage_pool }}:cloudinit"
+    bootdisk: scsi0
+    cicustom: "user=local:snippets/{{ item.1.name }}-user_data.yml"
+    agent: yes
+    # ciuser: user
+    # cipassword: hallowelt
+    net:
+      net0: "virtio,bridge=vmbr0"
+    ipconfig:
+      ipconfig0: "ip=dhcp"
+      # ipconfig0: "ip=192.168.1.200/24"
+    proxmox_default_behavior: compatibility
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  # loop_control:
+  #   pause: 10
+  # notify: sleep
+  register: created_templates_pve
+
+# - debug:
+#     var: created_templates_pve.results
+# - debug:
+#     var: created_templates_pve.results.item
+
+- name: Import init disk
+  ansible.builtin.command:
+    cmd: "qm importdisk {{ item.1.vmid }} /var/lib/vz/template/iso/{{ item.1.image }} {{ storage_pool }}"
+    creates: "/dev/mapper/VMs-vm--{{ item.1.vmid }}--disk--0"
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+
+- name: Create VM clone using Cloud-Init
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_apiuser }}"
+    api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
+    api_host: proxmox
+    template: false
+    name: "ansible-{{ item.1.vmid }}-00"
+    clone: "{{ item.1.template_name }}"
+    vmid: "{{ item.1.vmid }}"
+    newid: "{{ item.1.clone_id }}"
+    scsihw: virtio-scsi-pci
+    agent: yes
+    scsi:
+      # scsi0: "{{ storage_pool }}:32,format=raw"
+      scsi0: "{{ storage_pool }}:vm-{{ item.1.clone_id }}-disk-0,format=raw"
+      # scsi0: "{{ storage_pool }}:vm-{{ item.1.clone_id }}-disk-0,format=raw,size=30G"
+    # virtio:
+    #   virtio0: "vmstore:32,format=raw"
+    ide:
+      ide2: "{{ storage_pool }}:cloudinit"
+    bootdisk: scsi0
+    cicustom: "user=local:snippets/{{ item.1.name }}-user_data.yml"
+    # ciuser: user
+    # cipassword: hallowelt
+    net:
+      net0: "virtio,bridge=vmbr0"
+    ipconfig:
+      # TODO set ip range based on cluster size and avail ips
+      # this is ignored - prob due to user-data or template
+      ipconfig0: "ip=192.168.1.200/24"
+    proxmox_default_behavior: compatibility
+    timeout: 1000
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  # loop_control:
+  #   pause: 10
+  # notify: sleep
+  when: item.1.make_clone == true
+  register: created_clones_pve
+
+# - debug:
+#     var: created_clones_pve.results
+
+- name: Resize clone HD
+  vars:
+    interface_name: eth0
+    disk_size: "30G"
+  shell: "qm resize {{item.1.clone_id}} scsi0 +{{disk_size}}"
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  # loop_control:
+  #   pause: 10
+  # notify: sleep
+  when: item.1.make_clone == true
+
+- name: Start Clone VM
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_apiuser }}"
+    api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
+    api_host: proxmox
+    name: "ansible-{{ item.1.vmid }}-00"
+    state: started
+    timeout: 300
+    agent: yes
+  retries: 2
+  delay: 10
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  # loop_control:
+  #   pause: 10
+  # notify: sleep
+  when: item.1.make_clone == true
+  register: started_clones_pve
+
+# - debug:
+#     var: started_clones_pve.results
+
+- name: Check if VM ssh is up
+  vars:
+    interface_name: eth0
+  shell: >
+    qm guest cmd {{ item.1.clone_id }} network-get-interfaces
+    | jq -r ".[] | select(.name == \"{{ interface_name | quote }}\").\"ip-addresses\"[] | select(.\"ip-address-type\" == \"ipv4\").\"ip-address\" "
+  retries: 30
+  delay: 6
+  until: ip.stderr == ""
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  # loop_control:
+  #   pause: 10
+  # notify: sleep
+  when: item.1.make_clone == true
+  register: ip
+# - name: Setting ip as fact
+#   when: item.1.make_clone == true
+#   set_fact:
+#     vm_ip: '{{ nics.results[i].stdout | from_json | json_query(''"ip-addresses"[0]."ip-address"'') }}'
+#   with_subelements:
+#     - "{{ distros }}"
+#     - releases
+#   loop_control:
+#     index_var: i
+
+- debug:
+    var: ip.results
+- debug:
+    var: ip.results[0].stdout
+# - debug:
+#     var: vm_ip
+
+- name: Add info to local ssh config
+  delegate_to: localhost
+  vars:
+    hostname: "{{ item.1.hostname }}"
+  blockinfile:
+    path: /mnt/c/Users/shortpoet/.ssh/config
+    block: |
+      Host {{ hostname }}
+      AddKeysToAgent yes
+      Hostname {{ ip.results[i].stdout }}
+      User notroot
+      IdentityFile ~/.ssh/id_ed25519_proxmox
+      IdentitiesOnly yes
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for proxmox VM {{ item.1.vmid }}"
+    insertbefore: EOF
+    # newline screws up marker
+    # marker_begin: "\n#"
+    # marker_end: "#"
+    state: present
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+  loop_control:
+    index_var: i

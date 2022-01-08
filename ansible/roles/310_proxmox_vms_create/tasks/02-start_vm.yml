@@ -1,0 +1,14 @@
+- name: Start Clone VM
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_apiuser }}"
+    api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
+    api_host: proxmox
+    name: "ansible-{{ vmid }}-00"
+    state: started
+    timeout: 300
+    agent: yes
+  retries: 2
+  delay: 10
+  when: make_clone == true
+  register: started_clones_pve

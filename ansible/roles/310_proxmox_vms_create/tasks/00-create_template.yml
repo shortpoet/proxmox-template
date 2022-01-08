@@ -1,0 +1,49 @@
+---
+- name: Download cloud image
+  get_url:
+    url: "{{ url }}"
+    dest: /var/lib/vz/template/iso/{{ image }}
+
+- name: Synchronize user data file to snippets on proxmox node
+  vars:
+    hostname: "{{ hostname }}"
+  ansible.builtin.template:
+    src: "../configs/{{ name }}-user_data.j2"
+    dest: "/var/lib/vz/snippets/{{ name }}-user_data.yml"
+
+- name: Create VM template using Cloud-Init
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_apiuser }}"
+    # api_password: "{{ lookup('passwordstore', 'Homelab/proxmox/users/automation@pve') }}"
+    api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
+    api_host: proxmox
+    template: true
+    name: "{{ template_name }}"
+    vmid: "{{ vmid }}"
+    scsihw: virtio-scsi-pci
+    scsi:
+      # scsi0: "{{ storage_pool }}:32,format=raw"
+      scsi0: "{{ storage_pool }}:vm-{{ vmid }}-disk-0,format=raw"
+    # scsi0: "{{ storage_pool }}:vm-{{ item.1.vmid }}-disk-0,format=raw,size=30G"
+    # virtio:
+    #   virtio0: "{{ storage_pool }}:32,format=raw"
+    ide:
+      ide2: "{{ storage_pool }}:cloudinit"
+    bootdisk: scsi0
+    cicustom: "user=local:snippets/{{ name }}-user_data.yml"
+    agent: yes
+    # ciuser: user
+    # cipassword: hallowelt
+    net:
+      net0: "virtio,bridge=vmbr0"
+    ipconfig:
+      ipconfig0: "ip=dhcp"
+      # ipconfig0: "ip=192.168.1.200/24"
+    proxmox_default_behavior: compatibility
+  register: created_templates_pve
+
+- name: Import init disk
+  ansible.builtin.command:
+    cmd: "qm importdisk {{ vmid }} /var/lib/vz/template/iso/{{ image }} {{ storage_pool }}"
+    creates: "/dev/mapper/VMs-vm--{{ vmid }}--disk--0"

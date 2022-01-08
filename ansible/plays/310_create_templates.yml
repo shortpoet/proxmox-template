@@ -5,7 +5,7 @@
     pve_node: proxmox
     pve_apiuser: automation@pve
     pve_apipass: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
-    template_name: ubuntu2004-cloud-ansible
+    template_name: ansible-u2004-server
     storage_pool: vmstore
     distros:
       - name: ubuntu
@@ -17,9 +17,10 @@
             image: focal-server-cloudimg-amd64.img
             vmid: 9999
             clone_id: 999
-            template_name: "ubuntu2004-cloud-template-ansible"
+            template_name: ansible-u2004-server
             make_clone: true
-            hostname: u2004-server-ansible
+            hostname: ansible-u2004-server
+            provisioner: ansible
       #     - name: ubuntu-1804
       #       url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
       # - debian:
@@ -39,7 +40,7 @@
       #       last_modified: 2021-11-16 08:44
 
   roles:
-    - ../roles/300_proxmox_auth
+    # - ../roles/300_proxmox_auth
     - ../roles/310_proxmox_vms_create
 # - name: Print all available facts
 #   ansible.builtin.debug:

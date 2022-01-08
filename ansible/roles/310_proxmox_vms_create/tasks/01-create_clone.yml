@@ -1,0 +1,42 @@
+- name: Create VM clone using Cloud-Init
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_apiuser }}"
+    api_password: '{{ lookup("env", "PROXMOX_AUTOMATION_PASSWORD") }}'
+    api_host: proxmox
+    template: false
+    name: "ansible-{{ vmid }}-00"
+    clone: "{{ template_name }}"
+    vmid: "{{ vmid }}"
+    newid: "{{ clone_id }}"
+    scsihw: virtio-scsi-pci
+    agent: yes
+    scsi:
+      # scsi0: "{{ storage_pool }}:32,format=raw"
+      scsi0: "{{ storage_pool }}:vm-{{ clone_id }}-disk-0,format=raw"
+      # scsi0: "{{ storage_pool }}:vm-{{ item.1.clone_id }}-disk-0,format=raw,size=30G"
+    # virtio:
+    #   virtio0: "vmstore:32,format=raw"
+    ide:
+      ide2: "{{ storage_pool }}:cloudinit"
+    bootdisk: scsi0
+    cicustom: "user=local:snippets/{{ name }}-user_data.yml"
+    # ciuser: user
+    # cipassword: hallowelt
+    net:
+      net0: "virtio,bridge=vmbr0"
+    ipconfig:
+      # TODO set ip range based on cluster size and avail ips
+      # this is ignored - prob due to user-data or template
+      ipconfig0: "ip=192.168.1.200/24"
+    proxmox_default_behavior: compatibility
+    timeout: 1000
+  when: make_clone == true
+  register: created_clones_pve
+
+- name: Resize clone HD
+  vars:
+    interface_name: eth0
+    disk_size: "30G"
+  shell: "qm resize {{ clone_id }} scsi0 +{{ disk_size }}"
+  when: make_clone == true

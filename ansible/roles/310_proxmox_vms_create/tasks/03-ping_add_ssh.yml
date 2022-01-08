@@ -1,0 +1,36 @@
+- name: Check if VM ssh is up
+  vars:
+    interface_name: eth0
+  shell: >
+    qm guest cmd {{ clone_id }} network-get-interfaces 
+    | jq -r ".[] | select(.name == \"{{ interface_name | quote }}\").\"ip-addresses\"[] | select(.\"ip-address-type\" == \"ipv4\").\"ip-address\" "
+  retries: 30
+  delay: 6
+  until: ip.stderr == ""
+  when: make_clone == true
+  register: ip
+
+- debug:
+    var: ip
+- debug:
+    var: ip.stdout
+
+- name: Add info to local ssh config
+  delegate_to: localhost
+  vars:
+    hostname: "{{ hostname }}"
+  blockinfile:
+    path: /mnt/c/Users/shortpoet/.ssh/config
+    block: |
+      Host {{ hostname }}
+      AddKeysToAgent yes
+      Hostname {{ ip.stdout }}
+      User notroot
+      IdentityFile ~/.ssh/id_ed25519_proxmox
+      IdentitiesOnly yes
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for proxmox VM {{ clone_id }}"
+    insertbefore: EOF
+    # newline screws up marker
+    # marker_begin: "\n#"
+    # marker_end: "#"
+    state: present
