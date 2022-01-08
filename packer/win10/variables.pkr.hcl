@@ -15,6 +15,9 @@
 #   win_2k19_boot_command           = ["<enter>","<enter>"]
 #   clean_time                      = formatdate("YYMMDDhhmmss",timestamp())
 # }
+locals {
+  template_description = "Windows 10 64-bit Enterprise template built with Packer - ${formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())}"
+}
 
 #############################################################
 # Proxmox variables
