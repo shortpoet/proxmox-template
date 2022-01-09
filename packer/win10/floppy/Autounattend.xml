@@ -119,7 +119,6 @@
   </settings>
 
   <settings pass="specialize">
-
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -169,38 +168,32 @@
       <SecurityLayer>1</SecurityLayer>
       <UserAuthentication>0</UserAuthentication>
     </component>
+
+    <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <SkipAutoActivation>true</SkipAutoActivation>
+    </component>
+
+    <!-- <component name="Microsoft-Windows-ServerManager-SvrMgrNc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> -->
+    <!-- <DoNotOpenServerManagerAtLogon>true</DoNotOpenServerManagerAtLogon> -->
+    <!-- </component> -->
+
+    <!-- <component name="Microsoft-Windows-IE-ESC" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> -->
+    <!-- <IEHardenAdmin>false</IEHardenAdmin> -->
+    <!-- <IEHardenUser>false</IEHardenUser> -->
+    <!-- </component> -->
+
+    <!-- <component name="Microsoft-Windows-OutOfBoxExperience" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> -->
+    <!-- <DoNotOpenInitialConfigurationTasksAtLogon>true</DoNotOpenInitialConfigurationTasksAtLogon> -->
+    <!-- </component> -->
+
+    <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <CEIPEnabled>0</CEIPEnabled>
+    </component>
   </settings>
-
-  <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <SkipAutoActivation>true</SkipAutoActivation>
-  </component>
-
-  <component name="Microsoft-Windows-ServerManager-SvrMgrNc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <DoNotOpenServerManagerAtLogon>true</DoNotOpenServerManagerAtLogon>
-  </component>
-  <component name="Microsoft-Windows-IE-ESC" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <IEHardenAdmin>false</IEHardenAdmin>
-    <IEHardenUser>false</IEHardenUser>
-  </component>
-  <component name="Microsoft-Windows-OutOfBoxExperience" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <DoNotOpenInitialConfigurationTasksAtLogon>true</DoNotOpenInitialConfigurationTasksAtLogon>
-  </component>
-
-
-  <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
-    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <CEIPEnabled>0</CEIPEnabled>
-  </component>
-
 
   <settings pass="oobeSystem">
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
@@ -266,27 +259,45 @@
         <!-- {% endif %} -->
 
         <SynchronousCommand wcm:action="add">
+          <CommandLine>%SystemRoot%\System32\reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword /t REG_SZ /d "vagrant" /f</CommandLine>
+          <Order>10</Order>
+          <Description>Enable AutoLogon</Description>
+        </SynchronousCommand>
+
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>%SystemRoot%\System32\reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon /t REG_SZ /d 1 /f</CommandLine>
+          <Order>11</Order>
+          <Description>Enable AutoLogon</Description>
+        </SynchronousCommand>
+
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>powershell -File e:\scripts\test.ps1</CommandLine>
+          <Description>test</Description>
+          <Order>20</Order>
+        </SynchronousCommand>
+
+        <SynchronousCommand wcm:action="add">
           <CommandLine>powershell -File e:\scripts\Prep-Ansible.ps1</CommandLine>
           <Description>Configure Ansible Prep and WinRM</Description>
-          <Order>3</Order>
+          <Order>30</Order>
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
           <CommandLine>powershell -File e:\scripts\win-updates-pass1.ps1</CommandLine>
           <Description>Install Get-WindowsUpdate module and Windows Updates Pass 1</Description>
-          <Order>4</Order>
+          <Order>40</Order>
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
           <CommandLine>powershell Start-Sleep -Seconds 20</CommandLine>
           <Description>Insert a pause to prevent update pass 2 from starting just before reboot</Description>
-          <Order>5</Order>
+          <Order>41</Order>
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
           <CommandLine>powershell -File e:\scripts\win-updates-pass2.ps1</CommandLine>
           <Description>Install Windows Updates Pass 2</Description>
-          <Order>6</Order>
+          <Order>50</Order>
         </SynchronousCommand>
 
         <!-- <SynchronousCommand wcm:action="add"> -->
@@ -307,19 +318,19 @@
         <SynchronousCommand wcm:action="add">
           <CommandLine>powershell Start-Sleep -Seconds 25</CommandLine>
           <Description>Insert a pause to prevent possible reboot during sysprep</Description>
-          <Order>7</Order>
+          <Order>51</Order>
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
           <CommandLine>powershell Start-Sleep -Seconds 30</CommandLine>
           <Description>One more pause to prevent an early sysprep start</Description>
-          <Order>8</Order>
+          <Order>52</Order>
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
           <CommandLine>c:\windows\system32\sysprep\sysprep /generalize /oobe /reboot</CommandLine>
           <Description>Sysprep</Description>
-          <Order>10</Order>
+          <Order>99</Order>
         </SynchronousCommand>
 
 

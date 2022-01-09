@@ -24,6 +24,7 @@ source "proxmox" "win10x64_template" {
   winrm_password = "${var.winrm_password}"
   winrm_use_ssl  = true
   winrm_username = "${var.winrm_username}"
+  winrm_timeout  = "60m"
 
 
   iso_file = var.iso_file
@@ -54,6 +55,7 @@ source "proxmox" "win10x64_template" {
 
   # command: "qm create {{next_vmid.stdout}} --name {{template_name}} --sockets {{vm_sockets}} --cores {{vm_cores}} --memory {{vm_memory_mb}} --ide2 file={{os_iso_location}},media=cdrom --ide3 file=local:iso/{{template_name}}Provision.iso,media=cdrom --net0 model=virtio,bridge=vmbr0,firewall=1 --scsihw virtio-scsi-pci --scsi0 {{pve_storage_id}}:{{drive_size_gb}},format={{format}} --ostype {{vm_os_type}} --agent {{agent}}"
 
+  # drive D:\
   additional_iso_files {
     device = "ide1"
     # iso_checksum     = "7226710d4abe5def4c8722bff7222f80a43462f0"
@@ -63,6 +65,10 @@ source "proxmox" "win10x64_template" {
     unmount = true
   }
 
+  # drive E:\
+  # -> boot/OS
+
+  # drive F:\
   additional_iso_files {
     device   = "ide3"
     iso_file = "${var.iso_storage_pool}/${var.virtio_driver_iso}"

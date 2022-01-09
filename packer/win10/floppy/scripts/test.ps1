@@ -1,0 +1,1 @@
+Set-Content -Value 'test' -Path 'C:\test' -Force
