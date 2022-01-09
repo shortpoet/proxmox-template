@@ -46,4 +46,4 @@
     interface_name: eth0
     disk_size: "30G"
   shell: "qm resize {{ clone_id }} scsi0 +{{ disk_size }}"
-  when: make_clone == true
+  when: created_clones_pve.changed

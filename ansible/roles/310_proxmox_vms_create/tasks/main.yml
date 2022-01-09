@@ -60,6 +60,24 @@
   #   index_var: i
   #   pause: 10
   # notify: sleep
+
+- name: Check/Generate Ssh deploy key
+  include_role:
+    name: /mnt/h/source/orgs/shortpoet-ansible/role-dotfiles/roles/deploy_key
+    apply:
+      delegate_to: localhost
+  with_subelements:
+    - "{{ distros }}"
+    - releases
+
+- name: Install Dotfiles
+  include_role:
+    name: /mnt/h/source/orgs/shortpoet-ansible/role-dotfiles/roles/install_dotfiles
+    apply:
+      delegate_to: "{{ item.1.hostname }}"
+  with_subelements:
+    - "{{ distros }}"
+    - releases
 #
 # ####
 # # https://github.com/inoxio/ansible-role-proxmox-vms/blob/master/tasks/main.yml
