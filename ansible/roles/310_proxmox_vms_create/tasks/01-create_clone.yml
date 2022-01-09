@@ -41,6 +41,8 @@
   when: make_clone == true
   register: created_clones_pve
 
+# might need to implement further steps like expanding fs
+# https://pve.proxmox.com/wiki/Resize_disks
 - name: Resize clone HD
   vars:
     interface_name: eth0

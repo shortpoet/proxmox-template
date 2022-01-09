@@ -145,6 +145,7 @@ runcmd:
   # - systemctl reload ssh
   # - echo 'notroot ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/notroot
 
+# [Cloud-init – Part 2 – Advanced Ubuntu](https://www.lucd.info/2019/12/07/cloud-init-part-2-advanced-ubuntu/)
 #   # - netplan --debug apply
 #   # - sysctl -w net.ipv6.conf.all.disable_ipv6=1
 #   # - sysctl -w net.ipv6.conf.default.disable_ipv6=1
