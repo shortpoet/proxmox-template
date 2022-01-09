@@ -60,10 +60,10 @@ scp .\hirsute-server-cloudimg-amd64.img proxmox:/var/lib/vz/template/iso/
 ssh proxmox 'wget "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.208-1/virtio-win-0.1.208.iso" -P /var/lib/vz/template/iso/'
 scp "C:\Users\shortpoet\Documents\disk-images\win10\Win10_21H2_English_x64.iso" proxmox:/var/lib/vz/template/iso/Win10_21H2_English_x64.iso
 # xml -> iso
-cd /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10
-mkisofs -J -l -R -V "Label CD" -iso-level 4 -o Autounattend.iso "/mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/Autounattend.xml"
-scp Autounattend.iso proxmox:/var/lib/vz/template/iso/
-rm Autounattend.iso
+# mkisofs -J -l -R -V 'Label CD' -iso-level 4 -o '/mnt/h/source/iso/win10/Autounattend.iso' '/mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/'
+mkisofs -J -l -R -V 'Label CD' -iso-level 4 -o '/mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/Autounattend.iso' '/mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/'
+scp /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/Autounattend.iso proxmox:/var/lib/vz/template/iso/
+rm /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/Autounattend.iso
 # local
 wget "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.208-1/virtio-win-0.1.208.iso" -P /mnt/h/source/iso/win10
 ```
@@ -236,6 +236,7 @@ cd ~; chmod +x ./repos/linux/.bin/install.sh; ./repos/linux/.bin/install.sh
 - [How to Extract Specific Files from Windows 10 ISO (Install.wim)](https://www.winhelponline.com/blog/extract-files-windows-10-iso-dvd-install-wim/)
 
 ```powershell
+Mount-DiskImage -ImagePath H:\source\iso\win10\Autounattend.iso
 Mount-DiskImage -ImagePath H:\source\iso\win10\Win10_21H2_English_x64.iso
 Mount-DiskImage -ImagePath H:\source\iso\win10\virtio-win-0.1.208.iso
 # elevated

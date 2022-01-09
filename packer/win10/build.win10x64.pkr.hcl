@@ -8,11 +8,9 @@ build {
 
   provisioner "shell-local" {
     inline = [
-      "isoLog=$(mkisofs -J -l -R -V 'Label CD' -iso-level 4 -o '/mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/Autounattend.iso' '/mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/Autounattend.xml' 2>&1)",
-      "scpLog=$(scp /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/Autounattend.iso proxmox:/var/lib/vz/template/iso/ 2>&1)",
-      "rm /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/floppy/Autounattend.iso",
-      "echo $isoLog >> null_file.txt",
-      "echo $scpLog >> null_file.txt"
+      "mkisofs -J -l -R -V 'Label CD' -iso-level 4 -o '/mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/${var.floppy}/${var.autounattend_iso}.iso' '/mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/${var.floppy}/' 2>&1 | tee -a iso_log.txt",
+      "scp /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/${var.floppy}/${var.autounattend_iso}.iso proxmox:/var/lib/vz/template/iso/ 2>&1 | tee -a iso_log.txt",
+      "rm /mnt/h/source/orgs/shortpoet-ansible/proxmox-template/packer/win10/${var.floppy}/${var.autounattend_iso}.iso"
     ]
   }
 }

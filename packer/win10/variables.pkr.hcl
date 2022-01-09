@@ -56,6 +56,16 @@ variable "proxmox_insecure_skip_tls_verify" {
 # Template variables
 #############################################################
 
+variable "floppy" {
+  description = "Floppy for ISO for autounattend and scripts"
+  type        = string
+  default     = "floppy"
+}
+variable "autounattend_iso" {
+  description = "ISO for autounattend and scripts"
+  type        = string
+  default     = "Autounattend"
+}
 variable "iso_url" {
   description = "ISO image download link"
   type        = string

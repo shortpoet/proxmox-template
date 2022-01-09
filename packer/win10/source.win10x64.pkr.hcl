@@ -58,7 +58,7 @@ source "proxmox" "win10x64_template" {
     device = "ide1"
     # iso_checksum     = "7226710d4abe5def4c8722bff7222f80a43462f0"
     iso_storage_pool = "${var.iso_storage_pool}"
-    iso_file         = "${var.iso_storage_pool}/Autounattend.iso"
+    iso_file         = "${var.iso_storage_pool}/${var.autounattend_iso}.iso"
     # iso_file = "${var.iso_storage_pool}/Autounattend.iso"
     unmount = true
   }
