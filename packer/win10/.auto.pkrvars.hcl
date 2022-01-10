@@ -3,7 +3,7 @@ iso_storage_pool  = "local:iso"
 iso_file          = "local:iso/Win10_21H2_English_x64.iso"
 pool              = "templates"
 
-vm_id             = "8000"
+vm_id             = "8011"
 vm_name           = "packer-win10"
 floppy            = "floppy"
 autounattend_iso  = "Autounattend"

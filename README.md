@@ -27,6 +27,8 @@
 - [CptOfEvilMinions/BlogProjects - Public](https://github.com/CptOfEvilMinions/BlogProjects/tree/master/packer-windows)
 - [clayshek/ans-pve-win-provision - Public](https://github.com/clayshek/ans-pve-win-provision)
 - [clayshek/ans-pve-win-templ - Public](https://github.com/clayshek/ans-pve-win-templ)
+- [hashicorp/learn-packer-getting-started - Public](https://github.com/hashicorp/learn-packer-getting-started)
+- [kalenarndt/packer-vsphere-cloud-init - Public](https://github.com/kalenarndt/packer-vsphere-cloud-init)
 
 ## get images
 

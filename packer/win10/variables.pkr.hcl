@@ -53,9 +53,8 @@ variable "proxmox_insecure_skip_tls_verify" {
 }
 
 #############################################################
-# Template variables
+# Install variables
 #############################################################
-
 variable "floppy" {
   description = "Floppy for ISO for autounattend and scripts"
   type        = string
@@ -84,12 +83,43 @@ variable "iso_checksum" {
   description = " Checksum of the ISO file"
 }
 
+variable "image" {
+  type = object({
+    name = string
+    product_key = string
+    catalog_source = string
+  })
+  default = {
+    name: "Windows 10 Pro"
+    product_key: "VK7JG-NPHTM-C97JM-9MPGT-3V66T"
+    catalog_source: "\"wim:c:/users/shortpoet/documents/disk-images/win10/install.wim#Windows 10 Pro\""
+  }
+}
+
 variable "iso_file" {
   description = "Location of ISO file on the server. E.g. local:iso/<filename>.iso"
   type        = string
   default     = ""
 }
 
+variable "virtio_driver_iso" {
+  type = string
+}
+
+variable "drive_letter" {
+ type = object({
+    scripts = string
+    drivers = string
+  })
+  default = {
+    scripts: "D"
+    drivers: "F"
+  }
+}
+
+#############################################################
+# Template variables
+#############################################################
 variable "pool" {
   description = "Name of resource pool to create virtual machine in"
   type        = string
@@ -109,6 +139,12 @@ variable "vm_id" {
 variable "vm_name" {
   description = "VM name"
   type        = string
+}
+
+variable "hostname" {
+  description = "VM hostname"
+  type        = string
+  default = "packer-win10"
 }
 
 variable "vm_cpu_cores" {
@@ -154,9 +190,9 @@ variable "disk_storage_pool_type" {
 #############################################################
 # OS Settings
 #############################################################
-
-variable "virtio_driver_iso" {
+variable "winrm_username" {
   type = string
+  description = "The username of the account that should be used to connect to the windows instance via SSH"
 }
 
 variable "winrm_password" {
@@ -165,7 +201,35 @@ variable "winrm_password" {
   description = "The password for the username of the account that should be used to connect to the windows instance via SSH"
 }
 
-variable "winrm_username" {
-  type = string
-  description = "The username of the account that should be used to connect to the windows instance via SSH"
+variable "locale" {
+  type = object({
+    name = string
+    code = string
+    time_zone = string
+  })
+  default = {
+    name: "en-US"
+    code: "0409:00000409"
+    time_zone: "Central Standard Time"
+  }
+}
+variable "user" {
+  type = object({
+    name = string
+    display_name = string
+    group = string
+    password = string
+    is_pw_plain_text = bool
+    registered_org = string
+    registered_owner = string
+  })
+  default = {
+    name: "shortpoet"
+    display_name: "shortpoet"
+    group: "Administrators"
+    password: "dgBhAGcAcgBhAG4AdABQAGEAcwBzAHcAbwByAGQA"
+    is_pw_plain_text: false
+    registered_org: "shortpoet"
+    registered_owner: "shortpoet"
+  }
 }

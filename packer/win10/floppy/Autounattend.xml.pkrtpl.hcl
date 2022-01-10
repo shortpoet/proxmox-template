@@ -9,34 +9,34 @@
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
       <DriverPaths>
         <PathAndCredentials wcm:action="add" wcm:keyValue="2">
-          <Path>F:\viostor\w10\amd64</Path>
+          <Path>${drive_letter_drivers}:\viostor\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="3">
-          <Path>F:\NetKVM\w10\amd64</Path>
+          <Path>${drive_letter_drivers}:\NetKVM\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="4">
-          <Path>F:\Balloon\w10\amd64</Path>
+          <Path>${drive_letter_drivers}:\Balloon\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="5">
-          <Path>F:\pvpanic\w10\amd64</Path>
+          <Path>${drive_letter_drivers}:\pvpanic\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="6">
-          <Path>F:\qemupciserial\w10\amd64</Path>
+          <Path>${drive_letter_drivers}:\qemupciserial\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="7">
-          <Path>F:\qxldod\w10\amd64</Path>
+          <Path>${drive_letter_drivers}:\qxldod\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="8">
-          <Path>F:\vioinput\w10\amd64</Path>
+          <Path>${drive_letter_drivers}:\vioinput\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="9">
-          <Path>F:\viorng\w10\amd64</Path>
+          <Path>${drive_letter_drivers}:\viorng\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="10">
-          <Path>F:\vioscsi\w10\amd64</Path>
+          <Path>${drive_letter_drivers}:\vioscsi\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="11">
-          <Path>F:\vioserial\w10\amd64</Path>
+          <Path>${drive_letter_drivers}:\vioserial\w10\amd64</Path>
         </PathAndCredentials>
       </DriverPaths>
     </component>
@@ -45,13 +45,13 @@
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <SetupUILanguage>
-        <UILanguage>en-US</UILanguage>
+        <UILanguage>${locale_name}</UILanguage>
       </SetupUILanguage>
-      <InputLocale>0409:00000409</InputLocale>
-      <SystemLocale>en-US</SystemLocale>
-      <UILanguage>en-US</UILanguage>
-      <UILanguageFallback>en-US</UILanguageFallback>
-      <UserLocale>en-US</UserLocale>
+      <InputLocale>${locale_code}</InputLocale>
+      <SystemLocale>${locale_name}</SystemLocale>
+      <UILanguage>${locale_name}</UILanguage>
+      <UILanguageFallback>${locale_name}</UILanguageFallback>
+      <UserLocale>${locale_name}</UserLocale>
     </component>
 
     <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
@@ -89,7 +89,7 @@
           <InstallFrom>
             <MetaData wcm:action="add">
               <Key>/IMAGE/NAME</Key>
-              <Value>Windows 10 Pro</Value>
+              <Value>${image_name}</Value>
             </MetaData>
           </InstallFrom>
         </OSImage>
@@ -100,11 +100,11 @@
         <!-- Product Key from http://technet.microsoft.com/en-US/library/jj612867.aspx -->
         <ProductKey>
           <WillShowUI>Never</WillShowUI>
-          <Key>VK7JG-NPHTM-C97JM-9MPGT-3V66T</Key>
+          <Key>${image_product_key}</Key>
         </ProductKey>
         <AcceptEula>true</AcceptEula>
-        <FullName>shortpoet</FullName>
-        <Organization>shortpoet</Organization>
+        <FullName>${user_name}</FullName>
+        <Organization>${user_registered_org}</Organization>
       </UserData>
     </component>
   </settings>
@@ -121,8 +121,8 @@
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-      <ComputerName>packer-win10</ComputerName>
-      <ProductKey>VK7JG-NPHTM-C97JM-9MPGT-3V66T</ProductKey>
+      <ComputerName>${hostname}</ComputerName>
+      <ProductKey>${image_product_key}</ProductKey>
       <!-- <ProductKey>W269N-WFGWX-YVC9B-4J6C9-T83GX</ProductKey> -->
       <OEMInformation>
         <HelpCustomized>false</HelpCustomized>
@@ -136,11 +136,11 @@
     <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
       xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-      <InputLocale>0409:00000409</InputLocale>
-      <SystemLocale>en-US</SystemLocale>
-      <UILanguage>en-US</UILanguage>
-      <UILanguageFallback>en-US</UILanguageFallback>
-      <UserLocale>en-US</UserLocale>
+      <InputLocale>${locale_code}</InputLocale>
+      <SystemLocale>${locale_name}</SystemLocale>
+      <UILanguage>${locale_name}</UILanguage>
+      <UILanguageFallback>${locale_name}</UILanguageFallback>
+      <UserLocale>${locale_name}</UserLocale>
     </component>
 
     <component name="Microsoft-Windows-TerminalServices-LocalSessionManager" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"
@@ -210,22 +210,22 @@
         <ProtectYourPC>1</ProtectYourPC>
       </OOBE>
 
-      <RegisteredOrganization>shortpoet</RegisteredOrganization>
-      <RegisteredOwner>shortpoet</RegisteredOwner>
+      <RegisteredOrganization>${user_registered_org}</RegisteredOrganization>
+      <RegisteredOwner>${user_registered_owner}</RegisteredOwner>
       <DisableAutoDaylightTimeSet>false</DisableAutoDaylightTimeSet>
-      <TimeZone>Central Standard Time</TimeZone>
+      <TimeZone>${locale_time_zone}</TimeZone>
 
       <UserAccounts>
         <LocalAccounts>
           <LocalAccount wcm:action="add">
             <Password>
-              <Value>dgBhAGcAcgBhAG4AdABQAGEAcwBzAHcAbwByAGQA</Value>
-              <PlainText>false</PlainText>
+              <Value>${user_password}</Value>
+              <PlainText>${user_is_pw_plain_text}</PlainText>
             </Password>
             <Description></Description>
-            <DisplayName>shortpoet</DisplayName>
-            <Group>Administrators</Group>
-            <Name>shortpoet</Name>
+            <DisplayName>${user_display_name}</DisplayName>
+            <Group>${user_group}</Group>
+            <Name>${user_name}</Name>
           </LocalAccount>
         </LocalAccounts>
       </UserAccounts>
@@ -234,11 +234,11 @@
 
       <AutoLogon>
         <Password>
-          <Value>dgBhAGcAcgBhAG4AdABQAGEAcwBzAHcAbwByAGQA</Value>
-          <PlainText>false</PlainText>
+          <Value>${user_password}</Value>
+          <PlainText>${user_is_pw_plain_text}</PlainText>
         </Password>
         <Enabled>true</Enabled>
-        <Username>shortpoet</Username>
+        <Username>${user_name}</Username>
       </AutoLogon>
 
       <FirstLogonCommands>
@@ -265,7 +265,7 @@
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File D:\scripts\disable_winrm.ps1</CommandLine>
+          <CommandLine>C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File ${drive_letter_scripts}:\scripts\disable_winrm.ps1</CommandLine>
           <Description>Disable WinRM</Description>
           <Order>4</Order>
           <RequiresUserInput>true</RequiresUserInput>
@@ -273,7 +273,7 @@
 
         <!-- {% if agent is match("enabled=1") %} -->
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "F:\guest-agent\qemu-ga-x86_64.msi /quiet"</CommandLine>
+          <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass -Command "${drive_letter_drivers}:\guest-agent\qemu-ga-x86_64.msi /quiet"</CommandLine>
           <Order>5</Order>
           <Description>Install qemu-guest-agent</Description>
         </SynchronousCommand>
@@ -292,19 +292,19 @@
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File D:\scripts\test.ps1</CommandLine>
+          <CommandLine>powershell -File ${drive_letter_scripts}:\scripts\test.ps1</CommandLine>
           <Description>test</Description>
           <Order>20</Order>
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File D:\scripts\Prep-Ansible.ps1</CommandLine>
+          <CommandLine>powershell -File ${drive_letter_scripts}:\scripts\Prep-Ansible.ps1</CommandLine>
           <Description>Configure Ansible Prep and WinRM</Description>
           <Order>30</Order>
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File D:\scripts\win-updates-pass1.ps1</CommandLine>
+          <CommandLine>powershell -File ${drive_letter_scripts}:\scripts\win-updates-pass1.ps1</CommandLine>
           <Description>Install Get-WindowsUpdate module and Windows Updates Pass 1</Description>
           <Order>40</Order>
         </SynchronousCommand>
@@ -316,7 +316,7 @@
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File D:\scripts\win-updates-pass2.ps1</CommandLine>
+          <CommandLine>powershell -File ${drive_letter_scripts}:\scripts\win-updates-pass2.ps1</CommandLine>
           <Description>Install Windows Updates Pass 2</Description>
           <Order>50</Order>
         </SynchronousCommand>
@@ -373,5 +373,5 @@
     </component>
   </settings>
 
-  <cpi:offlineImage cpi:source="wim:c:/users/shortpoet/documents/disk-images/win10/install.wim#Windows 10 Pro" xmlns:cpi="urn:schemas-microsoft-com:cpi" />
+  <cpi:offlineImage cpi:source=${image_catalog_source} xmlns:cpi="urn:schemas-microsoft-com:cpi" />
 </unattend>

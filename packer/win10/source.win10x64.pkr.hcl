@@ -21,9 +21,9 @@ source "proxmox" "win10x64_template" {
 
   communicator   = "winrm"
   winrm_insecure = true
-  winrm_password = "${var.winrm_password}"
+  winrm_password = "${var.user.password}"
   winrm_use_ssl  = true
-  winrm_username = "${var.winrm_username}"
+  winrm_username = "${var.user.name}"
   winrm_timeout  = "60m"
 
 
