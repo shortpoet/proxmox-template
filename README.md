@@ -19,6 +19,14 @@
 - [community.general.proxmox_tasks_info – Retrieve information about one or more Proxmox VE tasks](https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_tasks_info_module.html#ansible-collections-community-general-proxmox-tasks-info-module)
 - https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_kvm_module.html#ansible-collections-community-general-proxmox-kvm-module
 - [kalenarndt/packer-vsphere-cloud-init - Public](https://github.com/kalenarndt/packer-vsphere-cloud-init/blob/master/templates/ubuntu/20/data/user-data.pkrtpl.hcl)
+- [chef/bento - Public](https://github.com/chef/bento/tree/main/packer_templates/windows)
+- [samgabrail/packer-terraform-vmware - Public](https://github.com/samgabrail/packer-terraform-vmware)
+- [ruzickap/packer-templates - Public](https://github.com/ruzickap/packer-templates)
+- [dbond007/Packer - Public](https://github.com/dbond007/Packer)
+- [joefitzgerald/packer-windowsPublic archive](https://github.com/joefitzgerald/packer-windows)
+- [CptOfEvilMinions/BlogProjects - Public](https://github.com/CptOfEvilMinions/BlogProjects/tree/master/packer-windows)
+- [clayshek/ans-pve-win-provision - Public](https://github.com/clayshek/ans-pve-win-provision)
+- [clayshek/ans-pve-win-templ - Public](https://github.com/clayshek/ans-pve-win-templ)
 
 ## get images
 
@@ -232,7 +240,7 @@ cd ~; chmod +x ./repos/linux/.bin/install.sh; ./repos/linux/.bin/install.sh
 
 ## Packer
 
-### Windows
+## Windows
 
 - [GitLab](https://grot.geeks.org/tanner/packer-windows/-/tree/bae4d5b880a080e3d1a101224c0fe65e18711771)
 - [How to Extract Specific Files from Windows 10 ISO (Install.wim)](https://www.winhelponline.com/blog/extract-files-windows-10-iso-dvd-install-wim/)
