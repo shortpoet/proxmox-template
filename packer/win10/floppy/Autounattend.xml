@@ -103,7 +103,7 @@
           <Key>VK7JG-NPHTM-C97JM-9MPGT-3V66T</Key>
         </ProductKey>
         <AcceptEula>true</AcceptEula>
-        <FullName>vagrant</FullName>
+        <FullName>shortpoet</FullName>
         <Organization>shortpoet</Organization>
       </UserData>
     </component>
@@ -211,7 +211,7 @@
       </OOBE>
 
       <RegisteredOrganization>shortpoet</RegisteredOrganization>
-      <RegisteredOwner>vagrant</RegisteredOwner>
+      <RegisteredOwner>shortpoet</RegisteredOwner>
       <DisableAutoDaylightTimeSet>false</DisableAutoDaylightTimeSet>
       <TimeZone>Central Standard Time</TimeZone>
 
@@ -223,9 +223,9 @@
               <PlainText>false</PlainText>
             </Password>
             <Description></Description>
-            <DisplayName>vagrant</DisplayName>
+            <DisplayName>shortpoet</DisplayName>
             <Group>Administrators</Group>
-            <Name>vagrant</Name>
+            <Name>shortpoet</Name>
           </LocalAccount>
         </LocalAccounts>
       </UserAccounts>
@@ -238,7 +238,7 @@
           <PlainText>false</PlainText>
         </Password>
         <Enabled>true</Enabled>
-        <Username>vagrant</Username>
+        <Username>shortpoet</Username>
       </AutoLogon>
 
       <FirstLogonCommands>
@@ -280,7 +280,7 @@
         <!-- {% endif %} -->
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>%SystemRoot%\System32\reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword /t REG_SZ /d "vagrant" /f</CommandLine>
+          <CommandLine>%SystemRoot%\System32\reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword /t REG_SZ /d "shortpoet" /f</CommandLine>
           <Order>10</Order>
           <Description>Enable AutoLogon</Description>
         </SynchronousCommand>
