@@ -47,7 +47,7 @@ build {
 }
 
 build {
-  name = "ubuntu"
+  name = "windows10"
   description = <<EOF
 This build creates windows images for windows versions :
 * 10 Pro

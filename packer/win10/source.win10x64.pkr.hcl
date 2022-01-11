@@ -24,7 +24,7 @@ source "proxmox" "win10x64_template" {
   winrm_password = "${var.user.password}"
   winrm_use_ssl  = true
   winrm_username = "${var.user.name}"
-  winrm_timeout  = "60m"
+  winrm_timeout  = "120m"
 
 
   iso_file = var.iso_file
