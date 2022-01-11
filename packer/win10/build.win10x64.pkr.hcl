@@ -19,14 +19,14 @@ locals {
     hostname = var.hostname
   })
 }
-source "file" "autounattend" {
-  content = local.template
-  target = "${var.floppy}/Autounattend.xml"
-}
+# source "file" "autounattend" {
+#   content = local.template
+#   target = "${var.floppy}/Autounattend.xml"
+# }
 
-build {
-  source "source.file.autounattend" {}
-}
+# build {
+#   source "source.file.autounattend" {}
+# }
 
 source "file" "transfer_autounattend_log" {}
 

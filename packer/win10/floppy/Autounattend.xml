@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
 
-  <!-- computer name on network while provisioning: VAGRANT-50DDSO0 -->
+  <!-- computer name on network: VAGRANT-50DDSO0 -->
 
   <settings pass="windowsPE">
 
@@ -97,13 +97,13 @@
       <UserData>
         <!-- Do not uncomment the Key element if you are using trial ISOs -->
         <!-- You must uncomment the Key element (and optionally insert your own key) if you are using retail or volume license ISOs -->
-        <!-- Product Key from http://technet.microsoft.com/en-US/library/jj612867.aspx -->
+        <!-- Product Key from http://technet.microsoft.com/en-us/library/jj612867.aspx -->
         <ProductKey>
           <WillShowUI>Never</WillShowUI>
           <Key>VK7JG-NPHTM-C97JM-9MPGT-3V66T</Key>
         </ProductKey>
         <AcceptEula>true</AcceptEula>
-        <FullName>shortpoet</FullName>
+        <FullName>vagrant</FullName>
         <Organization>shortpoet</Organization>
       </UserData>
     </component>
@@ -128,7 +128,7 @@
         <HelpCustomized>false</HelpCustomized>
       </OEMInformation>
       <!-- <ComputerName>*</ComputerName> -->
-      <!-- <TimeZone></TimeZone> -->
+      <!-- <TimeZone>{{vm_time_zone}}</TimeZone> -->
       <!-- <RegisteredOwner/> -->
     </component>
 
@@ -211,7 +211,7 @@
       </OOBE>
 
       <RegisteredOrganization>shortpoet</RegisteredOrganization>
-      <RegisteredOwner>shortpoet</RegisteredOwner>
+      <RegisteredOwner>vagrant</RegisteredOwner>
       <DisableAutoDaylightTimeSet>false</DisableAutoDaylightTimeSet>
       <TimeZone>Central Standard Time</TimeZone>
 
@@ -223,9 +223,9 @@
               <PlainText>false</PlainText>
             </Password>
             <Description></Description>
-            <DisplayName>shortpoet</DisplayName>
+            <DisplayName>vagrant</DisplayName>
             <Group>Administrators</Group>
-            <Name>shortpoet</Name>
+            <Name>vagrant</Name>
           </LocalAccount>
         </LocalAccounts>
       </UserAccounts>
@@ -238,7 +238,7 @@
           <PlainText>false</PlainText>
         </Password>
         <Enabled>true</Enabled>
-        <Username>shortpoet</Username>
+        <Username>vagrant</Username>
       </AutoLogon>
 
       <FirstLogonCommands>
@@ -265,7 +265,7 @@
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File D:\scripts\disable_winrm.ps1</CommandLine>
+          <CommandLine>C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File d:\scripts\disable_winrm.ps1</CommandLine>
           <Description>Disable WinRM</Description>
           <Order>4</Order>
           <RequiresUserInput>true</RequiresUserInput>
@@ -292,19 +292,19 @@
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File D:\scripts\test.ps1</CommandLine>
+          <CommandLine>powershell -File d:\scripts\test.ps1</CommandLine>
           <Description>test</Description>
           <Order>20</Order>
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File D:\scripts\Prep-Ansible.ps1</CommandLine>
+          <CommandLine>powershell -File d:\scripts\Prep-Ansible.ps1</CommandLine>
           <Description>Configure Ansible Prep and WinRM</Description>
           <Order>30</Order>
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File D:\scripts\win-updates-pass1.ps1</CommandLine>
+          <CommandLine>powershell -File d:\scripts\win-updates-pass1.ps1</CommandLine>
           <Description>Install Get-WindowsUpdate module and Windows Updates Pass 1</Description>
           <Order>40</Order>
         </SynchronousCommand>
@@ -316,7 +316,7 @@
         </SynchronousCommand>
 
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -File D:\scripts\win-updates-pass2.ps1</CommandLine>
+          <CommandLine>powershell -File d:\scripts\win-updates-pass2.ps1</CommandLine>
           <Description>Install Windows Updates Pass 2</Description>
           <Order>50</Order>
         </SynchronousCommand>
@@ -373,5 +373,6 @@
     </component>
   </settings>
 
-  <cpi:offlineImage cpi:source="wim:c:/users/shortpoet/documents/disk-images/win10/install.wim#Windows 10 Pro" xmlns:cpi="urn:schemas-microsoft-com:cpi" />
+  <cpi:offlineImage cpi:source="wim:c:/users/shortpoet/documents/disk-images/win10/install.wim#Windows 10 Pro"
+    xmlns:cpi="urn:schemas-microsoft-com:cpi" />
 </unattend>

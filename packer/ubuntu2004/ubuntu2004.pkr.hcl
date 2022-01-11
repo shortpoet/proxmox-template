@@ -1,17 +1,25 @@
 locals {
-  uri = "http://${var.WIN_IP_LOCAL}:{{ .HTTPPort }}/" 
-  boot0 = "<wait><enter><esc><wait5><f6><esc><wait> <bs><bs><bs><bs><bs> <bs><bs><bs><bs><bs> /casper/vmlinuz "
-  boot1 = "initrd=/casper/initrd ip=dhcp autoinstall ds=nocloud-net;s=${local.uri} --- <enter>"
+  # https://github.com/hashicorp/packer/issues/10168
+  # and then there's windows firewall
+  # uri = "http://http://192.168.1.136:{{ .HTTPPort }}/" # -> this serves to localhost on wsl but not to the IP
+  # uri = "http://{{ .HTTPIP }}:{{ .HTTPPort }}/" # -> this serves to ipconfig first net but prob doesn't pass firewall
+  # uri = "http://${var.WIN_IP_LOCAL}:{{ .HTTPPort }}/" # -> this fails with string error in WSL but ok in win
+  # boot0 = "<wait><enter><esc><wait5><f6><esc><wait> <bs><bs><bs><bs><bs> <bs><bs><bs><bs><bs> /casper/vmlinuz "
+  # boot1 = "initrd=/casper/initrd ip=dhcp autoinstall ds=nocloud-net;s=${local.uri} --- <enter>"
   boot_command = [
-    "${local.boot0}${local.boot1}"
-    # "<wait><enter><esc><wait5><f6><esc><wait>",
-    # "<bs><bs><bs><bs><bs>",
-    # "<bs><bs><bs><bs><bs>",
-    # "/casper/vmlinuz ",
-    # "initrd=/casper/initrd ",
-    # "ip=dhcp ",
+    # "${local.boot0}${local.boot1}"
+
+    "<wait><enter><esc><wait5><f6><esc><wait>",
+    "<bs><bs><bs><bs><bs>",
+    "<bs><bs><bs><bs><bs>",
+    "/casper/vmlinuz ",
+    "initrd=/casper/initrd ",
+    "ip=dhcp ",
+    # "autoinstall ds=nocloud-net;s=${local.uri}",
     # "autoinstall ds=nocloud-net;s=http://${var.WIN_IP_LOCAL}:{{ .HTTPPort }}/ ",
-    # "--- <enter>"
+    "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ",
+    "--- <enter>"
+
     # "<wait><enter><esc><wait5><f6><esc><wait> <bs><bs><bs><bs><bs> <bs><bs><bs><bs><bs> /casper/vmlinuz initrd=/casper/initrd ip=dhcp autoinstall ds=nocloud-net;s=${local.uri} --- <enter>"
     
   ]
@@ -63,10 +71,13 @@ source "proxmox" "template" {
   # template_name         = var.vm_name
   template_description  = var.template_description
   unmount_iso           = true
-
+  
+  # https://github.com/hashicorp/packer/issues/10168
+  # would have to set some kind of env var but string interpolation is borked on WSL (see above)
+  http_interface        = "Ethernet 2"
   http_directory        = "http"
   boot_wait             = "3s"
-  boot_command          = local.boot_command
+  boot_command          = "${local.boot_command}"
 }
 
 build {

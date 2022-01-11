@@ -15,7 +15,12 @@ variable "proxmox_username" {
 }
 
 variable "proxmox_password" {
-  description = "Proxmox password"
+  description = <<-EOT
+    Proxmox Password
+    export PKR_VAR_proxmox_password=$(pass Homelab/proxmox/users/automation@pve)
+    or
+    $env:PKR_VAR_proxmox_password=$(Get-Secret -Name ProxmoxAutomation -AsPlainText)
+  EOT
   type = string
 }
 # variable "PROXMOX_TOKEN" {
@@ -43,7 +48,7 @@ variable "WIN_IP_LOCAL" {
   description = <<-EOT
     $env:PKR_VAR_WIN_IP_LOCAL=$((Get-NetIPConfiguration | Select-Object IPv4Address -First 1).IPv4Address.IPAddress)
     or
-    export WIN_IP_LOCAL=$(pwsh.exe -c '$ip=$(Get-NetIPConfiguration | Select-Object IPv4Address -First 1);$ip.IPv4Address.IPAddress')
+    export PKR_VAR_WIN_IP_LOCAL=$(pwsh.exe -c '$ip=$(Get-NetIPConfiguration | Select-Object IPv4Address -First 1);$ip.IPv4Address.IPAddress')
   EOT
   type = string
 }

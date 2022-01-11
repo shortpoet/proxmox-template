@@ -194,6 +194,7 @@ qm guest cmd 999 network-get-interfaces | jq -r '.[] | select(.name == "eth0")."
 $env:TF_VAR_proxmox_password=$(Get-Secret -Name ProxmoxAutomation -AsPlainText)
 $env:PKR_VAR_proxmox_password=$(Get-Secret -Name ProxmoxAutomation -AsPlainText)
 $env:PKR_VAR_WIN_IP_LOCAL=$((Get-NetIPConfiguration | Select-Object IPv4Address -First 1).IPv4Address.IPAddress)
+$env:PACKER_LOG=1
 ```
 
 ```bash
@@ -201,7 +202,9 @@ export PKR_VAR_WIN_IP_LOCAL=$(/usr/sbin/ip -4 -o -json addr list eth0 | jq -r '.
 export PROXMOX_AUTOMATION_PASSWORD=$(pass Homelab/proxmox/users/automation@pve)
 export PKR_VAR_proxmox_password=$(pass Homelab/proxmox/users/automation@pve)
 export PACKER_LOG=1
-export PACKER_LOG_PATH=''
+# or
+export PACKER_LOG='TRACE'
+export PACKER_LOG_PATH='log/win10.log'
 mkpasswd -m sha-512 --rounds=4096 $(pass Homelab/proxmox/users/automation@pve)
 mkpasswd -m sha-512 $(pass Homelab/proxmox/users/automation@pve)
 ```
